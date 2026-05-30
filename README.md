@@ -1,4 +1,5 @@
-# 🧬 EvidenceCheck AI - Structured Biomedical Evidence Reasoning
+# 🧬 EvidenceCheck AI
+# Structured Biomedical Evidence Reasoning
 
 EvidenceCheck AI is an AI-powered biomedical evidence analysis platform designed to evaluate health and nutrition claims using scientific literature retrieval, structured evidence reasoning and causal inference.
 
@@ -23,26 +24,41 @@ Built as a real-world biomedical evidence verification platform.
 
 ## 🎯 What Makes This Different?
 
-Many AI fact-checking systems retrieve articles and ask a language model to summarize them.
+EvidenceCheck is designed to reason about scientific evidence rather than simply summarize scientific papers.
 
-EvidenceCheck introduces an intermediate evidence reasoning layer that evaluates:
+Many AI fact-checking systems retrieve scientific articles and ask a language model to generate a summary.
 
-- Study quality
-- Evidence direction
-- Consensus strength
-- Claim specificity
-- Potential conflicts of interest
-- Causal inference signals
+EvidenceCheck introduces a structured biomedical evidence reasoning layer that evaluates:
 
-before generating the final verdict.
+* Study design quality
+* Methodological strength
+* Evidence directionality
+* Scientific consensus
+* Claim specificity
+* Potential conflicts of interest
+* Bradford Hill causal signals
 
-This helps reduce common issues such as:
+before generating a verdict.
 
-- Treating absence of evidence as evidence against
-- Confusing weak evidence with contradictory evidence
-- Overstating causal conclusions
-- Misclassifying absolute claims
-- Ignoring differences between study designs
+This allows the system to distinguish between:
+
+* Direct support
+* Partial support
+* Lack of support
+* Contradictory evidence
+* Mixed evidence
+* Overgeneralized claims
+* Causal overstatement
+* Genuine evidence insufficiency
+
+By introducing structured evidence reasoning before AI analysis, EvidenceCheck aims to reduce common failure modes found in generic LLM-based fact-checking systems, including:
+
+* Treating absence of evidence as evidence against
+* Confusing weak evidence with contradictory evidence
+* Overstating causal conclusions
+* Misclassifying absolute claims
+* Ignoring differences between study designs
+* Applying unrealistic evidence standards when randomized trials are not ethically feasible
 
 ---
 
@@ -74,6 +90,30 @@ As a result, the claim cannot be considered universally true and depends on popu
 - Consensus strength: Mixed
 - Context dependency: High
 - Claim overgeneralization: Detected
+
+---
+
+## 🖼️ Screenshots
+
+### Dashboard Overview
+
+![Dashboard](screenshots/dashboard-home.png)
+
+### Analysis List
+
+![Analysis List](screenshots/analysis-list.png)
+
+### Detailed Analysis
+
+![Analysis Detail](screenshots/analysis-detail.png)
+
+### Email Report
+
+![Email Report](screenshots/email-report.png)
+
+### Pipeline Overview
+
+![Pipeline](screenshots/architecture-pipeline.png)
 
 ---
 
@@ -198,14 +238,16 @@ B --> C[PostgreSQL Jobs]
 C --> D[EvidenceCheck Pipeline]
 
 D --> E[PubMed Retrieval]
-D --> F[Evidence Ranking]
-D --> G[Contradiction Engine]
-D --> H[Claude Analysis]
+D --> F[Study Classification]
+D --> G[Evidence Ranking]
+D --> H[Directionality Engine]
+D --> I[Bradford Hill Signals]
+D --> J[Claude Reasoning]
 
-H --> I[Store Results]
+J --> K[Store Results]
 
-I --> J[Dashboard]
-I --> K[Email Report]
+K --> L[Dashboard]
+K --> M[Email Reports]
 ```
 
 ---
@@ -268,30 +310,6 @@ EvidenceCheck-AI/
     ├── email-report.png
     └── architecture-pipeline.png
 ```
-
----
-
-## 🖼️ Screenshots
-
-### Dashboard Overview
-
-![Dashboard](screenshots/dashboard-home.png)
-
-### Analysis List
-
-![Analysis List](screenshots/analysis-list.png)
-
-### Detailed Analysis
-
-![Analysis Detail](screenshots/analysis-detail.png)
-
-### Email Report
-
-![Email Report](screenshots/email-report.png)
-
-### Pipeline Overview
-
-![Pipeline](screenshots/architecture-pipeline.png)
 
 ---
 
@@ -443,6 +461,9 @@ The platform performs a multi-stage evidence evaluation process:
 * Public API
 * Advanced evidence visualization
 * Multi-user support
+* ClinicalTrials.gov
+* Guideline-based reasoning
+* Evidence timeline analysis
 
 ---
 
