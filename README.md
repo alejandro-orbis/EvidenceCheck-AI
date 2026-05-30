@@ -1,10 +1,12 @@
-# 🧬 EvidenceCheck AI
+# 🧬 EvidenceCheck AI - Structured Biomedical Evidence Reasoning
 
 EvidenceCheck AI is an AI-powered biomedical evidence analysis platform designed to evaluate health and nutrition claims using scientific literature retrieval, structured evidence reasoning and causal inference.
 
 Unlike traditional AI summarization systems, EvidenceCheck builds a structured evidence model before generating conclusions. The platform retrieves PubMed literature, classifies study designs, ranks methodological quality, evaluates evidence directionality, detects contradictions, analyzes claim specificity, incorporates Bradford Hill causal signals and generates evidence-based verdicts.
 
 Built as a real-world biomedical evidence verification platform.
+
+![Dashboard](screenshots/dashboard-home.png)
 
 [![n8n](https://img.shields.io/badge/n8n-Workflow-orange?style=flat-square)](https://n8n.io/)
 [![Claude](https://img.shields.io/badge/Claude-AI-000000?style=flat-square)](https://anthropic.com)
@@ -16,26 +18,6 @@ Built as a real-world biomedical evidence verification platform.
 ![Async Jobs](https://img.shields.io/badge/Architecture-Async%20Jobs-purple?style=flat-square)
 ![Portfolio Project](https://img.shields.io/badge/Portfolio-Project-success?style=flat-square)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
-
----
-
-## 🚀 Key Features
-
-- 🔬 Automated biomedical claim analysis
-- 📚 PubMed scientific literature retrieval
-- 🏆 Evidence ranking engine
-- 🧬 Study design classification
-- 📊 Methodological quality scoring
-- ⚖️ Directionality engine (supports, contradicts, does not support)
-- 🎯 Claim specificity analysis
-- 📈 Weighted evidence consensus
-- 🧪 Bradford Hill causal inference signals
-- 🛡️ Conflict-of-interest detection
-- 🚫 Anti-overstatement reasoning for absolute claims
-- 🧠 Claude-powered scientific reasoning
-- 📊 Interactive React dashboard
-- 🗄️ PostgreSQL asynchronous job architecture
-- 📧 Automated email reports
 
 ---
 
@@ -61,6 +43,57 @@ This helps reduce common issues such as:
 - Overstating causal conclusions
 - Misclassifying absolute claims
 - Ignoring differences between study designs
+
+---
+
+## 📋 Example Analysis
+
+### Claim
+
+> "Vitamin D prevents fractures in older adults"
+
+### Result
+
+| Metric | Value |
+|----------|----------|
+| Verdict | PARTIALLY TRUE |
+| Confidence | MODERATE |
+| Consensus | MIXED |
+
+### Reasoning
+
+Evidence suggests that vitamin D may help prevent fractures in specific populations, particularly when combined with calcium and in individuals with deficiency or higher risk profiles.
+
+However, the effect is not consistent across all populations. Some randomized controlled trials and meta-analyses have found limited or no benefit in healthy community-dwelling older adults.
+
+As a result, the claim cannot be considered universally true and depends on population characteristics, baseline deficiency status and supplementation strategy.
+
+### Evidence Signals
+
+- Evidence direction: Mixed
+- Consensus strength: Mixed
+- Context dependency: High
+- Claim overgeneralization: Detected
+
+---
+
+## 🚀 Key Features
+
+- 🔬 Automated biomedical claim analysis
+- 📚 PubMed scientific literature retrieval
+- 🏆 Evidence ranking engine
+- 🧬 Study design classification
+- 📊 Methodological quality scoring
+- ⚖️ Directionality engine (supports, contradicts, does not support)
+- 🎯 Claim specificity analysis
+- 📈 Weighted evidence consensus
+- 🧪 Bradford Hill causal inference signals
+- 🛡️ Conflict-of-interest detection
+- 🚫 Anti-overstatement reasoning for absolute claims
+- 🧠 Claude-powered scientific reasoning
+- 📊 Interactive React dashboard
+- 🗄️ PostgreSQL asynchronous job architecture
+- 📧 Automated email reports
 
 ---
 
