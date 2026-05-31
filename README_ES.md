@@ -326,7 +326,7 @@ Un breve recorrido que muestra:
 
 Vídeo de demostración en LinkedIn:
 
-[Vídeo Demo]([YOUR_LINKEDIN_VIDEO_URL](https://www.linkedin.com/feed/update/urn:li:activity:7466543078049206273/))
+[Ver Demo](https://www.linkedin.com/feed/update/urn:li:activity:7466543078049206273/)
 
 ---
 
