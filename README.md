@@ -326,7 +326,7 @@ A short walkthrough demonstrating:
 
 LinkedIn Demo Video:
 
-[Demo Video](YOUR_LINKEDIN_VIDEO_URL)
+[Watch Demo Video](https://www.linkedin.com/feed/update/urn:li:activity:7466543078049206273/)
 
 ---
 
