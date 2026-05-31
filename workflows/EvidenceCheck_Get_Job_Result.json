@@ -1,0 +1,121 @@
+{
+  "name": "EvidenceCheck - Get Job Result",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "evidencecheck_jobs",
+          "mode": "list",
+          "cachedResultName": "evidencecheck_jobs"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "job_id",
+              "value": "={{$json.params.job_id}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "name": "Load Analysis Job"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nif (!item) {\n  return [{\n    json: {\n      status: \"not_found\",\n      error: \"Job not found\"\n    }\n  }];\n}\n\nconst row = item.json;\n\nreturn [{\n  json: {\n    job_id: row.job_id,\n    status: row.status,\n    claim: row.claim,\n    result: row.result,\n    error: row.error,\n    created_at: row.created_at,\n    updated_at: row.updated_at\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "name": "Build Result Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        624,
+        0
+      ],
+      "name": "Return Analysis Result"
+    },
+    {
+      "parameters": {
+        "path": "evidence-check-result/:job_id",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "name": "API - Get Result"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Load Analysis Job": {
+      "main": [
+        [
+          {
+            "node": "Build Result Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Result Response": {
+      "main": [
+        [
+          {
+            "node": "Return Analysis Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API - Get Result": {
+      "main": [
+        [
+          {
+            "node": "Load Analysis Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {},
+  "tags": []
+}
