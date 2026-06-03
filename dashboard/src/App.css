@@ -73,12 +73,59 @@ h1 {
 }
 
 .card {
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  border-left-width: 3px;
 }
 
 .card:hover {
   transform: translateY(-4px);
   border-color: rgba(34, 211, 238, 0.45);
+}
+
+/* Borde izquierdo de color según veredicto */
+.card.card-verdadero {
+  border-left-color: var(--green);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 20px rgba(34,197,94,0.12);
+}
+.card.card-verdadero:hover {
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 28px rgba(34,197,94,0.22);
+}
+
+.card.card-parcialmente-cierto {
+  border-left-color: var(--orange);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 20px rgba(251,146,60,0.12);
+}
+.card.card-parcialmente-cierto:hover {
+  border-color: rgba(251, 146, 60, 0.5);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 28px rgba(251,146,60,0.22);
+}
+
+.card.card-exagerado {
+  border-left-color: var(--yellow);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 20px rgba(250,204,21,0.12);
+}
+.card.card-exagerado:hover {
+  border-color: rgba(250, 204, 21, 0.5);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 28px rgba(250,204,21,0.22);
+}
+
+.card.card-falso {
+  border-left-color: var(--red);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 20px rgba(251,113,133,0.12);
+}
+.card.card-falso:hover {
+  border-color: rgba(251, 113, 133, 0.5);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 28px rgba(251,113,133,0.22);
+}
+
+.card.card-evidencia-insuficiente {
+  border-left-color: var(--muted);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 20px rgba(148,163,184,0.08);
+}
+
+.card.card-processing {
+  border-left-color: var(--yellow);
 }
 
 /* Animación pulse para tarjetas en procesamiento */
@@ -139,33 +186,35 @@ h1 {
 .card h2,
 .detailHeader h2 {
   line-height: 1.35;
+  color: #ffffff;
+  font-weight: 600;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
 }
 
 .card h2 {
   font-size: 21px;
   margin: 24px 0 20px;
-  color: var(--text);
-  line-height: 1.35;
+  color: #ffffff;
 }
 
 .detailHeader h2 {
   font-size: 34px;
   margin: 20px 0 0;
-  color: var(--text);
-  line-height: 1.35;
+  color: #ffffff;
 }
 
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
 .metrics div {
   background: rgba(2, 6, 23, 0.68);
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 14px;
+  padding: 10px 8px;
+  text-align: center;
 }
 
 .metrics span,
@@ -198,6 +247,21 @@ h1 {
   color: #020617;
   font-weight: 900;
   box-shadow: 0 12px 28px rgba(34, 211, 238, 0.22);
+}
+
+.backButton {
+  border: 1px solid var(--cyan);
+  background: transparent;
+  color: var(--cyan);
+  font-size: 15px;
+  padding: 12px 32px;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.backButton:hover {
+  background: var(--cyan);
+  color: #020617;
+  transform: translateY(-2px);
 }
 
 .viewButton {
@@ -344,6 +408,7 @@ h1 {
   color: var(--muted);
 }
 
+/* Contradiction Engine - Estilos adicionales */
 .detailSection details summary {
   list-style: none;
   transition: color 0.2s ease;
@@ -369,6 +434,7 @@ h1 {
   color: var(--cyan);
 }
 
+/* Mejora de scroll para artículos largos */
 .articleRow,
 .detailSection a {
   word-break: break-word;
@@ -661,17 +727,21 @@ h1 {
     grid-template-columns: 1fr 1fr;
   }
 }
+/* ============================================
+   ERROR BANNER
+   ============================================ */
 
 .error-banner {
-  background: rgba(251, 113, 133, 0.15);
-  border: 1px solid var(--red);
-  border-radius: 16px;
-  padding: 12px 20px;
-  margin-bottom: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: rgba(251, 113, 133, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.4);
+  border-radius: 16px;
+  padding: 14px 20px;
   color: var(--red);
+  margin-bottom: 24px;
+  font-size: 14px;
 }
 
 .error-banner button {
@@ -680,8 +750,17 @@ h1 {
   color: var(--red);
   cursor: pointer;
   font-size: 18px;
-  padding: 0 8px;
+  padding: 0 4px;
+  line-height: 1;
 }
+
+.error-banner button:hover {
+  opacity: 0.7;
+}
+
+/* ============================================
+   RECHARTS — reducir tamaño de etiquetas
+   ============================================ */
 
 .recharts-pie-label-text {
   font-size: 10px !important;
@@ -695,3 +774,87 @@ h1 {
 .recharts-bar-label {
   font-size: 10px;
 }
+
+/* ============================================
+   ENGLISH VERDICT CARD COLORS
+   Fixes colors for English enum values:
+   TRUE, PARTIALLY_TRUE, EXAGGERATED, FALSE, INSUFFICIENT_EVIDENCE
+   ============================================ */
+
+.card.card-true {
+  border-left-color: var(--green);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 20px rgba(34,197,94,0.12);
+}
+
+.card.card-true:hover {
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 28px rgba(34,197,94,0.22);
+}
+
+.card.card-partially-true {
+  border-left-color: var(--orange);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 20px rgba(251,146,60,0.12);
+}
+
+.card.card-partially-true:hover {
+  border-color: rgba(251, 146, 60, 0.5);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 28px rgba(251,146,60,0.22);
+}
+
+.card.card-exaggerated {
+  border-left-color: var(--yellow);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 20px rgba(250,204,21,0.12);
+}
+
+.card.card-exaggerated:hover {
+  border-color: rgba(250, 204, 21, 0.5);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 28px rgba(250,204,21,0.22);
+}
+
+.card.card-false {
+  border-left-color: var(--red);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 20px rgba(251,113,133,0.12);
+}
+
+.card.card-false:hover {
+  border-color: rgba(251, 113, 133, 0.5);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 28px rgba(251,113,133,0.22);
+}
+
+.card.card-insufficient-evidence {
+  border-left-color: var(--muted);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.35), -2px 0 20px rgba(148,163,184,0.08);
+}
+
+/* English detail verdict border colors */
+
+.verdict-true {
+  border-color: rgba(34, 197, 94, 0.55);
+}
+
+.verdict-exaggerated {
+  border-color: rgba(250, 204, 21, 0.45);
+}
+
+.verdict-false {
+  border-color: rgba(251, 113, 133, 0.55);
+}
+
+.verdict-partially-true {
+  border-color: rgba(251, 146, 60, 0.55);
+}
+
+.verdict-insufficient-evidence {
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+/* Slightly cleaner Recharts axis/legend readability */
+
+.recharts-cartesian-axis-tick-value {
+  fill: #cbd5e1 !important;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+

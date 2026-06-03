@@ -9,9 +9,56 @@ const API_BASE = "https://n8n.orbisautomations.com/webhook";
 const RESULT_WEBHOOK_ID = "b3a0e855-cd74-456f-b217-6d15618482f6";
 
 // ============================================
+// Tipos TypeScript
+// ============================================
+interface Article {
+  pmid: string;
+  title: string;
+  pubmed_url?: string;
+  url?: string;
+  final_score?: number;
+  relation_to_claim?: string;
+}
+
+interface Job {
+  job_id: string;
+  status: string;
+  claim: string;
+  verdict: string | null;
+  confidence: string | null;
+  consensus: string | null;
+  summary: string | null;
+  articles_count: number;
+  created_at: string;
+  updated_at: string;
+  error: string | null;
+  language?: string;
+  result?: {
+    verdict?: string;
+    confidence?: string;
+    consensus?: string;
+    summary?: string;
+    generated_at?: string;
+    detailed_analysis?: string;
+    evidence_consensus?: {
+      supporting_count: number;
+      contradicting_count: number;
+      neutral_or_unclear_count: number;
+    };
+    articles?: Article[];
+    causal_assessment?: {
+      main_reason?: string;
+      epidemiological_reasoning?: string;
+    };
+  };
+}
+
+type Lang = "es" | "en";
+
+// ============================================
 // i18n — traducciones completas
 // ============================================
-const TRANSLATIONS = {
+const TRANSLATIONS: Record<Lang, any> = {
   es: {
     eyebrow: "EvidenceCheck AI",
     title: "Biomedical Evidence Dashboard",
@@ -29,16 +76,16 @@ const TRANSLATIONS = {
     kpiCompleted: "Completados",
     kpiProcessing: "Procesando",
     kpiArticles: "Artículos Analizados",
-    chartVerdicts: "Distribución de Veredictos",
+    chartVerdicts: "Distribución de Verdictos",
     chartConsensus: "Distribución de Consenso",
     searchPlaceholder: "🔍 Buscar afirmaciones, veredictos o resúmenes...",
-    noResults: (term) => `No se encontraron análisis que coincidan con "${term}"`,
+    noResults: (term: string) => `No se encontraron análisis que coincidan con "${term}"`,
     clearSearch: "Limpiar búsqueda",
     loading: "Cargando análisis...",
     processing: "Procesando",
     completed: "Completado",
     pending: "Pendiente",
-    analyzing: (s) => `⏳ Análisis en progreso${s}... Normalmente toma unos 30 segundos.`,
+    analyzing: (s: string) => `⏳ Análisis en progreso${s}... Normalmente toma unos 30 segundos.`,
     summaryUnavailable: "Resumen no disponible",
     viewAnalysis: "Ver Análisis",
     loadingDetail: "Cargando...",
@@ -61,7 +108,7 @@ const TRANSLATIONS = {
     contradictsTitle: "✗ CONTRADICEN LA AFIRMACIÓN",
     noSupporting: "No se encontró evidencia que apoye la afirmación",
     noContradicting: "No se encontró evidencia que contradiga la afirmación",
-    neutralArticles: (n) => `📄 ${n} artículo(s) con relación no concluyente`,
+    neutralArticles: (n: number) => `📄 ${n} artículo(s) con relación no concluyente`,
     score: "Puntuación",
     detailedAnalysis: "🔬 Análisis Detallado",
     causalAssessment: "📊 Evaluación Causal",
@@ -73,13 +120,19 @@ const TRANSLATIONS = {
       FALSO: "🔴 FALSO",
       EVIDENCIA_INSUFICIENTE: "⚪ INSUFICIENTE",
       PARCIALMENTE_CIERTO: "🟠 PARCIAL",
-
       TRUE: "🟢 VERDADERO",
       EXAGGERATED: "🟡 EXAGERADO",
       FALSE: "🔴 FALSO",
       INSUFFICIENT_EVIDENCE: "⚪ INSUFICIENTE",
       PARTIALLY_TRUE: "🟠 PARCIAL",
     },
+    confidenceLabels: {
+  HIGH: "ALTA",
+  MEDIUM: "MEDIA",
+  LOW: "BAJA",
+  VERY_HIGH: "MUY ALTA",
+  VERY_LOW: "MUY BAJA",
+},
     consensusLabels: {
       STRONG: "FUERTE", MODERATE: "MODERADO", WEAK: "DÉBIL",
       MIXED: "MIXTO", INSUFFICIENT: "INSUFICIENTE", UNCLEAR: "NO CLARO",
@@ -107,13 +160,13 @@ const TRANSLATIONS = {
     chartVerdicts: "Verdict Distribution",
     chartConsensus: "Consensus Distribution",
     searchPlaceholder: "🔍 Search claims, verdicts or summaries...",
-    noResults: (term) => `No analyses found matching "${term}"`,
+    noResults: (term: string) => `No analyses found matching "${term}"`,
     clearSearch: "Clear search",
     loading: "Loading analyses...",
     processing: "Processing",
     completed: "Completed",
     pending: "Pending",
-    analyzing: (s) => `⏳ Analysis in progress${s}... Usually takes about 30 seconds.`,
+    analyzing: (s: string) => `⏳ Analysis in progress${s}... Usually takes about 30 seconds.`,
     summaryUnavailable: "Summary not available",
     viewAnalysis: "View Analysis",
     loadingDetail: "Loading...",
@@ -136,24 +189,30 @@ const TRANSLATIONS = {
     contradictsTitle: "✗ CONTRADICT CLAIM",
     noSupporting: "No supporting evidence found",
     noContradicting: "No contradicting evidence found",
-    neutralArticles: (n) => `📄 ${n} article(s) with inconclusive relation`,
+    neutralArticles: (n: number) => `📄 ${n} article(s) with inconclusive relation`,
     score: "Score",
     detailedAnalysis: "🔬 Detailed Analysis",
     causalAssessment: "📊 Causal Assessment",
     noCausal: "No causal data available.",
     analysisNote: "⚠️ Analysis content is generated in Spanish regardless of interface language.",
-verdictLabels: {
-  VERDADERO: "🟢 TRUE",
-  EXAGERADO: "🟡 EXAGGERATED",
-  FALSO: "🔴 FALSE",
-  EVIDENCIA_INSUFICIENTE: "⚪ INSUFFICIENT",
-  PARCIALMENTE_CIERTO: "🟠 PARTIAL",
-
-  TRUE: "🟢 TRUE",
-  EXAGGERATED: "🟡 EXAGGERATED",
-  FALSE: "🔴 FALSE",
-  INSUFFICIENT_EVIDENCE: "⚪ INSUFFICIENT",
-  PARTIALLY_TRUE: "🟠 PARTIAL",
+    verdictLabels: {
+      VERDADERO: "🟢 TRUE",
+      EXAGERADO: "🟡 EXAGGERATED",
+      FALSO: "🔴 FALSE",
+      EVIDENCIA_INSUFICIENTE: "⚪ INSUFFICIENT",
+      PARCIALMENTE_CIERTO: "🟠 PARTIAL",
+      TRUE: "🟢 TRUE",
+      EXAGGERATED: "🟡 EXAGGERATED",
+      FALSE: "🔴 FALSE",
+      INSUFFICIENT_EVIDENCE: "⚪ INSUFFICIENT",
+      PARTIALLY_TRUE: "🟠 PARTIAL",
+    },
+    confidenceLabels: {
+  HIGH: "HIGH",
+  MEDIUM: "MEDIUM",
+  LOW: "LOW",
+  VERY_HIGH: "VERY HIGH",
+  VERY_LOW: "VERY LOW",
 },
     consensusLabels: {
       STRONG: "STRONG", MODERATE: "MODERATE", WEAK: "WEAK",
@@ -164,15 +223,12 @@ verdictLabels: {
   },
 };
 
-const VERDICT_COLORS = {
-  // Español
+const VERDICT_COLORS: Record<string, string> = {
   VERDADERO: "#22c55e",
   EXAGERADO: "#facc15",
   FALSO: "#fb7185",
   EVIDENCIA_INSUFICIENTE: "#94a3b8",
   PARCIALMENTE_CIERTO: "#fb923c",
-
-  // Inglés / valores canónicos del frontend
   TRUE: "#22c55e",
   EXAGGERATED: "#facc15",
   FALSE: "#fb7185",
@@ -180,7 +236,7 @@ const VERDICT_COLORS = {
   PARTIALLY_TRUE: "#fb923c",
 };
 
-const CONSENSUS_COLORS = {
+const CONSENSUS_COLORS: Record<string, string> = {
   STRONG: "#22c55e",
   MODERATE: "#38bdf8",
   MIXED: "#facc15",
@@ -206,9 +262,9 @@ const CONSENSUS_ORDER = [
   "UNCLEAR",
 ];
 
-function normalizeVerdict(value = "") {
+function normalizeVerdict(value: string | null | undefined): string {
   const key = String(value || "").trim().toUpperCase();
-  const map = {
+  const map: Record<string, string> = {
     VERDADERO: "TRUE",
     TRUE: "TRUE",
     FALSO: "FALSE",
@@ -224,9 +280,9 @@ function normalizeVerdict(value = "") {
   return map[key] || key;
 }
 
-function normalizeConsensus(value = "") {
+function normalizeConsensus(value: string | null | undefined): string {
   const key = String(value || "").trim().toUpperCase();
-  const map = {
+  const map: Record<string, string> = {
     FUERTE: "STRONG",
     STRONG: "STRONG",
     MODERADO: "MODERATE",
@@ -244,19 +300,19 @@ function normalizeConsensus(value = "") {
   return map[key] || key;
 }
 
-function badgeClass(value = "") {
+function badgeClass(value: string) {
   return String(value).toLowerCase().replaceAll("_", "-");
 }
 
-function verdictCardClass(verdict, status) {
+function verdictCardClass(verdict: string | null | undefined, status: string) {
   if (status === "processing") return "card-processing";
   if (!verdict) return "";
   return "card-" + normalizeVerdict(verdict).toLowerCase().replaceAll("_", "-");
 }
 
-function getElapsedTime(createdAt) {
+function getElapsedTime(createdAt: string) {
   if (!createdAt) return "";
-  const elapsed = Math.floor((Date.now() - new Date(createdAt)) / 1000);
+  const elapsed = Math.floor((Date.now() - new Date(createdAt).getTime()) / 1000);
   if (elapsed < 60) return ` (${elapsed}s)`;
   return ` (${Math.floor(elapsed / 60)}m ${elapsed % 60}s)`;
 }
@@ -264,7 +320,7 @@ function getElapsedTime(createdAt) {
 // ============================================
 // Language Toggle
 // ============================================
-function LangToggle({ lang, onChange }) {
+function LangToggle({ lang, onChange }: { lang: Lang; onChange: (lang: Lang) => void }) {
   return (
     <button
       onClick={() => onChange(lang === "es" ? "en" : "es")}
@@ -286,11 +342,11 @@ function LangToggle({ lang, onChange }) {
         alignItems: "center",
         gap: "6px",
       }}
-      onMouseEnter={e => {
+      onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = "var(--cyan)";
         e.currentTarget.style.color = "var(--cyan)";
       }}
-      onMouseLeave={e => {
+      onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = "rgba(148,163,184,0.3)";
         e.currentTarget.style.color = "var(--muted)";
       }}
@@ -303,10 +359,16 @@ function LangToggle({ lang, onChange }) {
 // ============================================
 // Article card (subcomponente reutilizable)
 // ============================================
-function ArticleLink({ article, accent, compact = false, scoreLabel }) {
+function ArticleLink({ article, accent, compact = false, scoreLabel }: { 
+  article: Article; 
+  accent: string; 
+  compact?: boolean; 
+  scoreLabel: string;
+}) {
+  const pubmedUrl = article.pubmed_url || article.url || `https://pubmed.ncbi.nlm.nih.gov/${article.pmid}/`;
   return (
     <a
-      href={article.pubmed_url || article.url}
+      href={pubmedUrl}
       target="_blank"
       rel="noopener noreferrer"
       style={{
@@ -340,32 +402,34 @@ function ArticleLink({ article, accent, compact = false, scoreLabel }) {
 // ============================================
 function App() {
   // Idioma — persistido en localStorage
-  const [lang, setLang] = useState(() => localStorage.getItem("ec_lang") || "es");
+  const [lang, setLang] = useState<Lang>(() => {
+    const saved = localStorage.getItem("ec_lang") as Lang;
+    return saved === "es" || saved === "en" ? saved : "es";
+  });
   const t = TRANSLATIONS[lang];
 
-const handleLangChange = (newLang) => {
-  setLang(newLang);
-  localStorage.setItem("ec_lang", newLang);
+  const handleLangChange = (newLang: Lang) => {
+    setLang(newLang);
+    localStorage.setItem("ec_lang", newLang);
+    setJobs([]);
+    setSelectedJob(null);
+    setSearchTerm("");
+    setError(null);
+  };
 
-  setJobs([]);
-  setSelectedJob(null);
-  setSearchTerm("");
-  setError(null);
-};
-
-  const [jobs, setJobs] = useState([]);
-  const [selectedJob, setSelectedJob] = useState(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [selectedJob, setSelectedJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [loadingJobId, setLoadingJobId] = useState(null);
+  const [loadingJobId, setLoadingJobId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [lastRefresh, setLastRefresh] = useState(null);
-  const [error, setError] = useState(null);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [claimText, setClaimText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const pollingIntervals = useRef({});
+  const pollingIntervals = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   const loadJobs = useCallback(async () => {
     try {
@@ -377,6 +441,7 @@ const handleLangChange = (newLang) => {
       setJobs(data.jobs || []);
       setLastRefresh(new Date());
     } catch (err) {
+      console.error(err);
       setError(t.loadError);
     } finally {
       setLoading(false);
@@ -415,7 +480,7 @@ const handleLangChange = (newLang) => {
     };
   }, [jobs, loadJobs]);
 
-  async function openDetail(jobId, status) {
+  async function openDetail(jobId: string, status: string) {
     if (!jobId || status !== "completed") return;
     try {
       setLoadingJobId(jobId);
@@ -440,9 +505,7 @@ const handleLangChange = (newLang) => {
       const response = await fetch(`${API_BASE}/evidence-check-submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ claim: claimText.trim(),
-  language: lang
-}),
+        body: JSON.stringify({ claim: claimText.trim(), language: lang }),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
@@ -475,16 +538,14 @@ const handleLangChange = (newLang) => {
     const completed = jobs.filter(j => j.status === "completed").length;
     const processing = jobs.filter(j => j.status === "processing").length;
     const totalArticles = jobs.reduce((sum, j) => sum + (j.articles_count || 0), 0);
-    const verdictDistribution = {};
-    const consensusDistribution = {};
+    const verdictDistribution: Record<string, number> = {};
+    const consensusDistribution: Record<string, number> = {};
     jobs.forEach(job => {
       const normalizedVerdict = normalizeVerdict(job.verdict);
       const normalizedConsensus = normalizeConsensus(job.consensus);
-
       if (normalizedVerdict) {
         verdictDistribution[normalizedVerdict] = (verdictDistribution[normalizedVerdict] || 0) + 1;
       }
-
       if (normalizedConsensus) {
         consensusDistribution[normalizedConsensus] = (consensusDistribution[normalizedConsensus] || 0) + 1;
       }
@@ -510,7 +571,7 @@ const handleLangChange = (newLang) => {
 
   const detail = selectedJob?.result;
   const consensus = detail?.evidence_consensus;
-  const articles = detail?.articles || [];
+  const articles: Article[] = detail?.articles || [];
 
   const totalDirectional = (consensus?.supporting_count || 0) + (consensus?.contradicting_count || 0);
   const supportsPercent = totalDirectional > 0 ? (consensus.supporting_count / totalDirectional) * 100 : 0;
@@ -547,9 +608,11 @@ const handleLangChange = (newLang) => {
       {/* VISTA DETALLE */}
       {selectedJob && (
         <section className="detailPanel">
-          <button className="backButton" onClick={() => setSelectedJob(null)}>
-            {t.back}
-          </button>
+<div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
+  <button className="backButton" onClick={() => setSelectedJob(null)}>
+    ← {t.back.replace("←", "").trim()}
+  </button>
+</div>
 
           <div className="detailHeader">
             <div>
@@ -564,7 +627,6 @@ const handleLangChange = (newLang) => {
             </div>
           </div>
 
-          {/* Nota de idioma */}
           {lang === "en" && (
             <p style={{ color: "var(--muted)", fontSize: "12px", margin: "8px 0 0", fontStyle: "italic" }}>
               {t.analysisNote}
@@ -575,10 +637,7 @@ const handleLangChange = (newLang) => {
             <div><span>{t.confidence}</span><strong>{detail?.confidence || "-"}</strong></div>
             <div><span>{t.consensus}</span><strong>{t.consensusLabels[normalizeConsensus(detail?.consensus)] || detail?.consensus || "-"}</strong></div>
             <div><span>{t.articles}</span><strong>{articles.length}</strong></div>
-            <div>
-              <span>{t.generated}</span>
-              <strong>{detail?.generated_at ? new Date(detail.generated_at).toLocaleString() : "-"}</strong>
-            </div>
+            <div><span>{t.generated}</span><strong>{detail?.generated_at ? new Date(detail.generated_at).toLocaleString() : "-"}</strong></div>
           </div>
 
           <section className="detailSection highlight">
@@ -616,7 +675,6 @@ const handleLangChange = (newLang) => {
           <section className="detailSection">
             <h3>{t.evidenceBreakdown}</h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginTop: "16px" }}>
-              {/* Apoyan */}
               <div style={{ background: "rgba(34,197,94,0.06)", borderRadius: "20px", padding: "20px", border: "1px solid rgba(34,197,94,0.2)" }}>
                 <h4 style={{ color: "var(--green)", marginTop: 0, marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px", fontSize: "18px" }}>
                   {t.supportsTitle}
@@ -632,7 +690,6 @@ const handleLangChange = (newLang) => {
                 </div>
               </div>
 
-              {/* Contradicen */}
               <div style={{ background: "rgba(251,113,133,0.06)", borderRadius: "20px", padding: "20px", border: "1px solid rgba(251,113,133,0.2)" }}>
                 <h4 style={{ color: "var(--red)", marginTop: 0, marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px", fontSize: "18px" }}>
                   {t.contradictsTitle}
@@ -657,7 +714,7 @@ const handleLangChange = (newLang) => {
                   </summary>
                   <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "10px" }}>
                     {neutralArticles.map(a => (
-                      <a key={a.pmid} href={a.pubmed_url} target="_blank" rel="noopener noreferrer"
+                      <a key={a.pmid} href={a.pubmed_url || `https://pubmed.ncbi.nlm.nih.gov/${a.pmid}/`} target="_blank" rel="noopener noreferrer"
                         style={{ textDecoration: "none", background: "rgba(15,23,42,0.6)", borderRadius: "12px", padding: "12px", display: "block" }}>
                         <span style={{ fontSize: "13px" }}>{a.title}</span>
                         <div style={{ fontSize: "10px", color: "var(--muted)", marginTop: "6px" }}>
@@ -786,12 +843,12 @@ const handleLangChange = (newLang) => {
 
                   <h2>{job.claim || "—"}</h2>
 
-                  <div className="metrics">
-                    <div><span>{t.verdict}</span><strong>{job.status === "processing" ? `⏳ ${t.pending}` : (t.verdictLabels[normalizeVerdict(job.verdict)] || job.verdict || t.pending)}</strong></div>
-                    <div><span>{t.confidence}</span><strong>{job.status === "processing" ? "-" : (job.confidence || "-")}</strong></div>
-                    <div><span>{t.consensus}</span><strong>{job.status === "processing" ? "-" : (t.consensusLabels[normalizeConsensus(job.consensus)] || job.consensus || "-")}</strong></div>
-                    <div><span>{t.articles}</span><strong>{job.status === "processing" ? "⏳" : (job.articles_count ?? 0)}</strong></div>
-                  </div>
+<div className="metrics">
+  <div><span>{t.verdict}</span><strong>{job.status === "processing" ? `⏳ ${t.pending}` : (t.verdictLabels[normalizeVerdict(job.verdict)] || job.verdict || t.pending)}</strong></div>
+  <div><span>{t.confidence}</span><strong>{job.status === "processing" ? "-" : (t.confidenceLabels?.[String(job.confidence).toUpperCase()] || job.confidence || "-")}</strong></div>
+  <div><span>{t.consensus}</span><strong>{job.status === "processing" ? "-" : (t.consensusLabels[normalizeConsensus(job.consensus)] || job.consensus || "-")}</strong></div>
+  <div><span>{t.articles}</span><strong>{job.status === "processing" ? "⏳" : (job.articles_count ?? 0)}</strong></div>
+</div>
 
                   <p className="summary">
                     {job.status === "processing"
