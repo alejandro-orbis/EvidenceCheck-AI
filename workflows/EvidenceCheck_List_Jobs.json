@@ -1,0 +1,102 @@
+{
+  "name": "EvidenceCheck - List Jobs",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "evidence-check-jobs",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "name": "API - List Jobs"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  job_id,\n  status,\n  claim,\n  result,\n  error,\n  created_at,\n  updated_at\nFROM evidencecheck_jobs\nORDER BY created_at DESC\nLIMIT 20;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "name": "Load Recent Analysis Jobs"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(item => item.json);\n\nreturn [{\n  json: {\n    total: rows.length,\n    jobs: rows.map(row => {\n      let result = row.result;\n\n      if (typeof result === 'string') {\n        try {\n          result = JSON.parse(result);\n        } catch (e) {\n          result = null;\n        }\n      }\n\n      return {\n        job_id: row.job_id,\n        status: row.status,\n        claim: row.claim || result?.claim || null,\n        verdict: result?.verdict || null,\n        confidence: result?.confidence || null,\n        consensus: result?.consensus || null,\n        summary: result?.summary || null,\n        articles_count: result?.articles?.length || 0,\n        created_at: row.created_at,\n        updated_at: row.updated_at,\n        error: row.error\n      };\n    })\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "name": "Build Jobs List Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        624,
+        0
+      ],
+      "name": "Return Jobs List"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "API - List Jobs": {
+      "main": [
+        [
+          {
+            "node": "Load Recent Analysis Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Recent Analysis Jobs": {
+      "main": [
+        [
+          {
+            "node": "Build Jobs List Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Jobs List Response": {
+      "main": [
+        [
+          {
+            "node": "Return Jobs List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {},
+  "tags": []
+}
