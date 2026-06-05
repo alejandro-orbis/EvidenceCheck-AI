@@ -19,11 +19,14 @@ jobs:
       with:
         node-version: '22'
 
-    - name: Clean install dependencies
+    - name: Clear npm cache
+      run: npm cache clean --force
+
+    - name: Clean install
       run: |
         cd dashboard
         rm -rf node_modules package-lock.json
-        npm install
+        npm install --no-package-lock
 
     - name: Run tests
       run: |
