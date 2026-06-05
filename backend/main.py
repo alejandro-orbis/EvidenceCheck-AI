@@ -1,12 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from dotenv import load_dotenv
 import httpx
+from dotenv import load_dotenv
 from datetime import datetime
 
 load_dotenv()
@@ -31,20 +29,14 @@ class JobResponse(BaseModel):
     job_id: str
     status: str
 
-# Configuración
-N8N_WEBHOOK = os.getenv("N8N_WEBHOOK", "https://n8n.orbisautomations.com/webhook/evidence-check-submit")
-N8N_JOBS_URL = os.getenv("N8N_JOBS_URL", "https://n8n.orbisautomations.com/webhook/evidence-check-jobs")
-N8N_RESULT_URL = os.getenv("N8N_RESULT_URL", "https://n8n.orbisautomations.com/webhook/b3a0e855-cd74-456f-b217-6d15618482f6/evidence-check-result")
+# Configuración (SIN valores por defecto - usar .env)
+N8N_WEBHOOK = os.getenv("N8N_WEBHOOK")
+N8N_JOBS_URL = os.getenv("N8N_JOBS_URL")
+N8N_RESULT_URL = os.getenv("N8N_RESULT_URL")
 
-# Conexión a PostgreSQL (opcional - alternativa directa)
-def get_db_connection():
-    return psycopg2.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        port=os.getenv("DB_PORT", "5432"),
-        database=os.getenv("DB_NAME", "evidencecheck"),
-        user=os.getenv("DB_USER", "postgres"),
-        password=os.getenv("DB_PASSWORD", "")
-    )
+# Validar que existen las variables de entorno
+if not all([N8N_WEBHOOK, N8N_JOBS_URL, N8N_RESULT_URL]):
+    raise ValueError("Missing required environment variables: N8N_WEBHOOK, N8N_JOBS_URL, N8N_RESULT_URL")
 
 # ============================================
 # Endpoints
@@ -66,7 +58,6 @@ async def create_analysis(claim_request: ClaimRequest):
     print(f"   🕐 Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"   📝 Claim: {claim_request.claim}")
     print(f"   🌐 Idioma: {claim_request.language}")
-    print(f"   🔗 Enviando a n8n: {N8N_WEBHOOK}")
     print("=" * 70)
     
     async with httpx.AsyncClient() as client:
