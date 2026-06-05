@@ -32,11 +32,12 @@
         208,
         0
       ],
-      "name": "Load Analysis Job"
+      "name": "Load Analysis Job",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first();\n\nif (!item) {\n  return [{\n    json: {\n      status: \"not_found\",\n      error: \"Job not found\"\n    }\n  }];\n}\n\nconst row = item.json;\n\nreturn [{\n  json: {\n    job_id: row.job_id,\n    status: row.status,\n    claim: row.claim,\n    result: row.result,\n    error: row.error,\n    created_at: row.created_at,\n    updated_at: row.updated_at\n  }\n}];"
+        "jsCode": "const item = $input.first();\nconst row = item?.json || {};\n\nif (!row.job_id) {\n  return [{\n    json: {\n      status: \"not_found\",\n      error: \"Job not found\"\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    job_id: row.job_id,\n    status: row.status,\n    claim: row.claim,\n    result: row.result,\n    error: row.error,\n    created_at: row.created_at,\n    updated_at: row.updated_at\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -75,7 +76,6 @@
       "name": "API - Get Result"
     }
   ],
-  "pinData": {},
   "connections": {
     "Load Analysis Job": {
       "main": [
@@ -111,11 +111,10 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "meta": {},
   "tags": []
 }

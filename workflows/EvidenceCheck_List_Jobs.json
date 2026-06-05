@@ -18,7 +18,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  job_id,\n  status,\n  claim,\n  result,\n  error,\n  created_at,\n  updated_at\nFROM evidencecheck_jobs\nORDER BY created_at DESC\nLIMIT 20;",
+        "query": "SELECT\n  job_id,\n  status,\n  claim,\n  result,\n  error,\n  created_at,\n  updated_at,\n  language\nFROM evidencecheck_jobs\nWHERE COALESCE(language, 'es') = '{{ [\"es\", \"en\"].includes($json.query?.language) ? $json.query.language : \"es\" }}'\nORDER BY created_at DESC\nLIMIT 100;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -56,7 +56,6 @@
       "name": "Return Jobs List"
     }
   ],
-  "pinData": {},
   "connections": {
     "API - List Jobs": {
       "main": [
@@ -92,11 +91,8 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
-  },
-  "meta": {},
-  "tags": []
+  }
 }

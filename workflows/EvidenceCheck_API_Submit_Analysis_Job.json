@@ -1,5 +1,5 @@
 {
-  "name": "EvidenceCheck API - Submit Analysis Job",
+  "name": "EvidenceCheck API - Submit Analysis Job (Public)",
   "nodes": [
     {
       "parameters": {
@@ -32,12 +32,14 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "claim": "={{$json.body.claim}}",
-            "status": "processing"
+            "claim": "={{$json.body?.claim || ''}}",
+            "status": "processing",
+            "language": "={{['es','en'].includes($json.body?.language) ? $json.body.language : 'es'}}"
           },
           "matchingColumns": [],
           "schema": [
             {
+              "id": "job_id",
               "displayName": "job_id",
               "required": false,
               "defaultMatch": false,
@@ -47,6 +49,7 @@
               "removed": true
             },
             {
+              "id": "status",
               "displayName": "status",
               "required": false,
               "defaultMatch": false,
@@ -55,6 +58,7 @@
               "canBeUsedToMatch": true
             },
             {
+              "id": "claim",
               "displayName": "claim",
               "required": false,
               "defaultMatch": false,
@@ -63,6 +67,7 @@
               "canBeUsedToMatch": true
             },
             {
+              "id": "result",
               "displayName": "result",
               "required": false,
               "defaultMatch": false,
@@ -72,6 +77,7 @@
               "removed": true
             },
             {
+              "id": "error",
               "displayName": "error",
               "required": false,
               "defaultMatch": false,
@@ -80,6 +86,7 @@
               "canBeUsedToMatch": true
             },
             {
+              "id": "created_at",
               "displayName": "created_at",
               "required": false,
               "defaultMatch": false,
@@ -88,12 +95,23 @@
               "canBeUsedToMatch": true
             },
             {
+              "id": "updated_at",
               "displayName": "updated_at",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "dateTime",
               "canBeUsedToMatch": true
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -129,7 +147,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"job_id\": \"{{ $json.job_id }}\",\n  \"status\": \"{{ $json.status }}\"\n}",
+        "responseBody": "={{$json}}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
@@ -143,10 +161,10 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{$env.EVIDENCECHECK_PIPELINE_URL}}",
+        "url": "={{$env.EVIDENCECHECK_ENGINE_WEBHOOK}}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"job_id\": \"={{ $json.job_id }}\",\n  \"claim\": \"={{ $node['Receive Analysis Request'].json.body.claim }}\",\n  \"from\": \"={{ $node['Receive Analysis Request'].json.body.from || $env.DEFAULT_WHATSAPP_TO }}\",\n  \"source\": \"dashboard\",\n  \"async\": true\n}",
+        "jsonBody": "={\n  \"job_id\": \"={{ $json.job_id }}\",\n  \"claim\": \"={{ $node['Receive Analysis Request'].json.body.claim }}\",\n  \"language\": \"={{ ['es','en'].includes($node['Receive Analysis Request'].json.body.language) ? $node['Receive Analysis Request'].json.body.language : 'es' }}\",\n  \"from\": \"={{ $node['Receive Analysis Request'].json.body.from || 'dashboard' }}\",\n  \"source\": \"dashboard\",\n  \"async\": true\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -155,10 +173,9 @@
         656,
         64
       ],
-      "name": "Trigger EvidenceCheck Pipeline"
+      "name": "Trigger EvidenceCheck Engine"
     }
   ],
-  "pinData": {},
   "connections": {
     "Receive Analysis Request": {
       "main": [
@@ -191,29 +208,26 @@
             "index": 0
           },
           {
-            "node": "Trigger EvidenceCheck Pipeline",
+            "node": "Trigger EvidenceCheck Engine",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Return Job ID": {
+    "Trigger EvidenceCheck Engine": {
       "main": [
         []
       ]
     },
-    "Trigger EvidenceCheck Pipeline": {
+    "Return Job ID": {
       "main": [
         []
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
-  },
-  "meta": {},
-  "tags": []
+  }
 }
