@@ -137,7 +137,6 @@ As a result, the claim cannot be considered universally true and depends on popu
 - 📊 Interactive React + TypeScript dashboard
 - 🐍 FastAPI backend with REST endpoints
 - 🗄️ SQLite (n8n) + Supabase (results) architecture
-- 📊 Interactive React dashboard
 - 🗄️ PostgreSQL asynchronous job architecture
 - 📧 Automated email reports
 - 🧪 26 passing tests with Vitest
@@ -522,17 +521,25 @@ Tests cover:
 
 ## 🗺️ Roadmap
 
-* Cochrane integration
-* WHO evidence sources
-* NICE guideline integration
-* User authentication
-* Historical evidence tracking
-* Public API
-* Advanced evidence visualization
-* Multi-user support
-* ClinicalTrials.gov
-* Guideline-based reasoning
-* Evidence timeline analysis
+### ✅ Completed
+- FastAPI backend integration
+- TypeScript migration
+- 26 passing tests with Vitest
+- Bilingual dashboard (ES/EN)
+- Interactive API documentation (Swagger UI)
+
+### 🔄 Planned
+- Cochrane integration
+- WHO evidence sources
+- NICE guideline integration
+- User authentication
+- Historical evidence tracking
+- Public API
+- Advanced evidence visualization
+- Multi-user support
+- ClinicalTrials.gov
+- Guideline-based reasoning
+- Evidence timeline analysis
 
 ---
 
