@@ -5,8 +5,11 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList,
 } from "recharts";
 
-const API_BASE = "https://n8n.orbisautomations.com/webhook";
-const RESULT_WEBHOOK_ID = "b3a0e855-cd74-456f-b217-6d15618482f6";
+// ============================================
+// 🔥 CAMBIO IMPORTANTE: Ahora usa FastAPI
+// ============================================
+const API_BASE = "http://localhost:8000";
+// Ya no se necesita RESULT_WEBHOOK_ID porque FastAPI tiene sus propios endpoints
 
 // ============================================
 // Tipos TypeScript
@@ -58,7 +61,7 @@ type Lang = "es" | "en";
 // ============================================
 // i18n — traducciones completas
 // ============================================
-const TRANSLATIONS: Record<Lang, any> = {
+export const TRANSLATIONS: Record<Lang, any> = {
   es: {
     eyebrow: "EvidenceCheck AI",
     title: "Biomedical Evidence Dashboard",
@@ -127,12 +130,12 @@ const TRANSLATIONS: Record<Lang, any> = {
       PARTIALLY_TRUE: "🟠 PARCIAL",
     },
     confidenceLabels: {
-  HIGH: "ALTA",
-  MEDIUM: "MEDIA",
-  LOW: "BAJA",
-  VERY_HIGH: "MUY ALTA",
-  VERY_LOW: "MUY BAJA",
-},
+      HIGH: "ALTA",
+      MEDIUM: "MEDIA",
+      LOW: "BAJA",
+      VERY_HIGH: "MUY ALTA",
+      VERY_LOW: "MUY BAJA",
+    },
     consensusLabels: {
       STRONG: "FUERTE", MODERATE: "MODERADO", WEAK: "DÉBIL",
       MIXED: "MIXTO", INSUFFICIENT: "INSUFICIENTE", UNCLEAR: "NO CLARO",
@@ -208,12 +211,12 @@ const TRANSLATIONS: Record<Lang, any> = {
       PARTIALLY_TRUE: "🟠 PARTIAL",
     },
     confidenceLabels: {
-  HIGH: "HIGH",
-  MEDIUM: "MEDIUM",
-  LOW: "LOW",
-  VERY_HIGH: "VERY HIGH",
-  VERY_LOW: "VERY LOW",
-},
+      HIGH: "HIGH",
+      MEDIUM: "MEDIUM",
+      LOW: "LOW",
+      VERY_HIGH: "VERY HIGH",
+      VERY_LOW: "VERY LOW",
+    },
     consensusLabels: {
       STRONG: "STRONG", MODERATE: "MODERATE", WEAK: "WEAK",
       MIXED: "MIXED", INSUFFICIENT: "INSUFFICIENT", UNCLEAR: "UNCLEAR",
@@ -262,7 +265,7 @@ const CONSENSUS_ORDER = [
   "UNCLEAR",
 ];
 
-function normalizeVerdict(value: string | null | undefined): string {
+export function normalizeVerdict(value: string | null | undefined): string {
   const key = String(value || "").trim().toUpperCase();
   const map: Record<string, string> = {
     VERDADERO: "TRUE",
@@ -280,7 +283,7 @@ function normalizeVerdict(value: string | null | undefined): string {
   return map[key] || key;
 }
 
-function normalizeConsensus(value: string | null | undefined): string {
+export function normalizeConsensus(value: string | null | undefined): string {
   const key = String(value || "").trim().toUpperCase();
   const map: Record<string, string> = {
     FUERTE: "STRONG",
@@ -300,17 +303,17 @@ function normalizeConsensus(value: string | null | undefined): string {
   return map[key] || key;
 }
 
-function badgeClass(value: string) {
+export function badgeClass(value: string) {
   return String(value).toLowerCase().replaceAll("_", "-");
 }
 
-function verdictCardClass(verdict: string | null | undefined, status: string) {
+export function verdictCardClass(verdict: string | null | undefined, status: string) {
   if (status === "processing") return "card-processing";
   if (!verdict) return "";
   return "card-" + normalizeVerdict(verdict).toLowerCase().replaceAll("_", "-");
 }
 
-function getElapsedTime(createdAt: string) {
+export function getElapsedTime(createdAt: string) {
   if (!createdAt) return "";
   const elapsed = Math.floor((Date.now() - new Date(createdAt).getTime()) / 1000);
   if (elapsed < 60) return ` (${elapsed}s)`;
@@ -322,37 +325,36 @@ function getElapsedTime(createdAt: string) {
 // ============================================
 function LangToggle({ lang, onChange }: { lang: Lang; onChange: (lang: Lang) => void }) {
   return (
-    <button
-      onClick={() => onChange(lang === "es" ? "en" : "es")}
-      style={{
-        position: "fixed",
-        top: "20px",
-        right: "24px",
-        background: "rgba(17,28,52,0.95)",
-        border: "1px solid rgba(148,163,184,0.3)",
-        borderRadius: "999px",
-        padding: "8px 16px",
-        color: "var(--muted)",
-        cursor: "pointer",
-        fontSize: "13px",
-        fontWeight: "700",
-        zIndex: 1000,
-        transition: "border-color 0.2s, color 0.2s",
-        display: "flex",
-        alignItems: "center",
-        gap: "6px",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = "var(--cyan)";
-        e.currentTarget.style.color = "var(--cyan)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = "rgba(148,163,184,0.3)";
-        e.currentTarget.style.color = "var(--muted)";
-      }}
-    >
-      {lang === "es" ? "🇪🇸 ES" : "🇬🇧 EN"}
-    </button>
+    <div style={{ display: "flex", gap: "8px", position: "fixed", top: "20px", right: "24px", zIndex: 1000 }}>
+      <button
+        onClick={() => onChange("es")}
+        style={{
+          background: lang === "es" ? "var(--cyan)" : "rgba(17,28,52,0.95)",
+          border: "1px solid rgba(148,163,184,0.3)",
+          borderRadius: "999px",
+          padding: "8px 16px",
+          cursor: "pointer",
+          fontWeight: "700",
+          color: lang === "es" ? "#020617" : "var(--muted)",
+        }}
+      >
+        🇪🇸 ES
+      </button>
+      <button
+        onClick={() => onChange("en")}
+        style={{
+          background: lang === "en" ? "var(--cyan)" : "rgba(17,28,52,0.95)",
+          border: "1px solid rgba(148,163,184,0.3)",
+          borderRadius: "999px",
+          padding: "8px 16px",
+          cursor: "pointer",
+          fontWeight: "700",
+          color: lang === "en" ? "#020617" : "var(--muted)",
+        }}
+      >
+        🇬🇧 EN
+      </button>
+    </div>
   );
 }
 
@@ -431,14 +433,16 @@ function App() {
 
   const pollingIntervals = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
+  // 🔥 MODIFICADO: Ahora usa /jobs de FastAPI
   const loadJobs = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`${API_BASE}/evidence-check-jobs?language=${lang}`);
+      const res = await fetch(`${API_BASE}/jobs?language=${lang}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setJobs(data.jobs || []);
+      // FastAPI devuelve un array directamente, no { jobs: [] }
+      setJobs(Array.isArray(data) ? data : data.jobs || []);
       setLastRefresh(new Date());
     } catch (err) {
       console.error(err);
@@ -452,6 +456,7 @@ function App() {
     loadJobs();
   }, [loadJobs]);
 
+  // Polling para jobs en procesamiento
   useEffect(() => {
     const processingJobs = jobs.filter(job => job.status === "processing");
     if (processingJobs.length === 0) return;
@@ -460,7 +465,8 @@ function App() {
       if (pollingIntervals.current[job.job_id]) return;
       pollingIntervals.current[job.job_id] = setInterval(async () => {
         try {
-          const res = await fetch(`${API_BASE}/${RESULT_WEBHOOK_ID}/evidence-check-result/${job.job_id}`);
+          // 🔥 MODIFICADO: Usa /result/{job_id} de FastAPI
+          const res = await fetch(`${API_BASE}/result/${job.job_id}`);
           const data = await res.json();
           if (data.status !== "processing") {
             clearInterval(pollingIntervals.current[job.job_id]);
@@ -480,12 +486,13 @@ function App() {
     };
   }, [jobs, loadJobs]);
 
+  // 🔥 MODIFICADO: Usa /result/{job_id} de FastAPI
   async function openDetail(jobId: string, status: string) {
     if (!jobId || status !== "completed") return;
     try {
       setLoadingJobId(jobId);
       setError(null);
-      const res = await fetch(`${API_BASE}/${RESULT_WEBHOOK_ID}/evidence-check-result/${jobId}`);
+      const res = await fetch(`${API_BASE}/result/${jobId}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const jobMeta = jobs.find(j => j.job_id === jobId);
@@ -497,12 +504,13 @@ function App() {
     }
   }
 
+  // 🔥 MODIFICADO: Usa /analysis de FastAPI
   async function submitClaim() {
     if (!claimText.trim()) return;
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const response = await fetch(`${API_BASE}/evidence-check-submit`, {
+      const response = await fetch(`${API_BASE}/analysis`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ claim: claimText.trim(), language: lang }),
@@ -608,11 +616,11 @@ function App() {
       {/* VISTA DETALLE */}
       {selectedJob && (
         <section className="detailPanel">
-<div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
-  <button className="backButton" onClick={() => setSelectedJob(null)}>
-    ← {t.back.replace("←", "").trim()}
-  </button>
-</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
+            <button className="backButton" onClick={() => setSelectedJob(null)}>
+              ← {t.back.replace("←", "").trim()}
+            </button>
+          </div>
 
           <div className="detailHeader">
             <div>
@@ -843,12 +851,12 @@ function App() {
 
                   <h2>{job.claim || "—"}</h2>
 
-<div className="metrics">
-  <div><span>{t.verdict}</span><strong>{job.status === "processing" ? `⏳ ${t.pending}` : (t.verdictLabels[normalizeVerdict(job.verdict)] || job.verdict || t.pending)}</strong></div>
-  <div><span>{t.confidence}</span><strong>{job.status === "processing" ? "-" : (t.confidenceLabels?.[String(job.confidence).toUpperCase()] || job.confidence || "-")}</strong></div>
-  <div><span>{t.consensus}</span><strong>{job.status === "processing" ? "-" : (t.consensusLabels[normalizeConsensus(job.consensus)] || job.consensus || "-")}</strong></div>
-  <div><span>{t.articles}</span><strong>{job.status === "processing" ? "⏳" : (job.articles_count ?? 0)}</strong></div>
-</div>
+                  <div className="metrics">
+                    <div><span>{t.verdict}</span><strong>{job.status === "processing" ? `⏳ ${t.pending}` : (t.verdictLabels[normalizeVerdict(job.verdict)] || job.verdict || t.pending)}</strong></div>
+                    <div><span>{t.confidence}</span><strong>{job.status === "processing" ? "-" : (t.confidenceLabels?.[String(job.confidence).toUpperCase()] || job.confidence || "-")}</strong></div>
+                    <div><span>{t.consensus}</span><strong>{job.status === "processing" ? "-" : (t.consensusLabels[normalizeConsensus(job.consensus)] || job.consensus || "-")}</strong></div>
+                    <div><span>{t.articles}</span><strong>{job.status === "processing" ? "⏳" : (job.articles_count ?? 0)}</strong></div>
+                  </div>
 
                   <p className="summary">
                     {job.status === "processing"
