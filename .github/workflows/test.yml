@@ -19,14 +19,17 @@ jobs:
       with:
         node-version: '22'
 
-    - name: Clear npm cache
-      run: npm cache clean --force
-
-    - name: Clean install
+    - name: Verify package-lock.json versions
       run: |
         cd dashboard
-        rm -rf node_modules package-lock.json
-        npm install --no-package-lock
+        echo "Checking react-dom version in package-lock.json:"
+        grep -A2 '"react-dom"' package-lock.json | head -5
+
+    - name: Clean install with lockfile
+      run: |
+        cd dashboard
+        rm -rf node_modules
+        npm ci
 
     - name: Run tests
       run: |
