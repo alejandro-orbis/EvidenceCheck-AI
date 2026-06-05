@@ -50,9 +50,6 @@ async def health_check():
 async def create_analysis(claim_request: ClaimRequest):
     """Envía un claim a n8n para procesamiento"""
     
-    # ============================================
-    # 📥 LOG DE ENTRADA (IDA)
-    # ============================================
     print("=" * 70)
     print(f"📥 [IDA] NUEVO CLAIM RECIBIDO EN FASTAPI")
     print(f"   🕐 Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -77,14 +74,11 @@ async def create_analysis(claim_request: ClaimRequest):
         job_id = data.get("job_id")
         status = data.get("status", "processing")
         
-        # ============================================
-        # 📤 LOG DE RESPUESTA (VUELTA)
-        # ============================================
         print(f"✅ [VUELTA] CLAIM ENVIADO A N8N CORRECTAMENTE")
         print(f"   🆔 Job ID: {job_id}")
         print(f"   📊 Status: {status}")
         print("=" * 70)
-        print("")  # Línea en blanco para separar
+        print("")
         
         return JobResponse(job_id=job_id, status=status)
 
@@ -117,9 +111,6 @@ async def get_result(job_id: str):
         
         data = response.json()
         
-        # ============================================
-        # 📊 LOG DEL RESULTADO (si está completado)
-        # ============================================
         if data.get("status") == "completed":
             print(f"✅ [RESULTADO] Job {job_id} completado")
             print(f"   🏆 Veredicto: {data.get('verdict', 'N/A')}")
