@@ -21,7 +21,6 @@ Built as a real-world biomedical evidence verification platform.
 ![Async Jobs](https://img.shields.io/badge/Architecture-Async%20Jobs-purple?style=flat-square)
 ![Portfolio Project](https://img.shields.io/badge/Portfolio-Project-success?style=flat-square)
 [![Tests](https://img.shields.io/badge/Tests-26%20passing-brightgreen?style=flat-square)](https://vitest.dev/)
-[![CodeQL](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/codeql.yml/badge.svg)](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
 
 ---
