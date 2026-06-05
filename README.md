@@ -13,11 +13,14 @@ Built as a real-world biomedical evidence verification platform.
 [![Claude](https://img.shields.io/badge/Claude-AI-000000?style=flat-square)](https://anthropic.com)
 [![PubMed](https://img.shields.io/badge/PubMed-NCBI-326599?style=flat-square)](https://pubmed.ncbi.nlm.nih.gov/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 ![Biomedical Evidence](https://img.shields.io/badge/Biomedical-Evidence%20Analysis-blue?style=flat-square)
 ![Bradford Hill](https://img.shields.io/badge/Bradford%20Hill-Causal%20Inference-darkgreen?style=flat-square)
 ![Async Jobs](https://img.shields.io/badge/Architecture-Async%20Jobs-purple?style=flat-square)
 ![Portfolio Project](https://img.shields.io/badge/Portfolio-Project-success?style=flat-square)
+[![Tests](https://img.shields.io/badge/Tests-26%20passing-brightgreen?style=flat-square)](https://vitest.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
 
 ---
@@ -131,9 +134,14 @@ As a result, the claim cannot be considered universally true and depends on popu
 - 🛡️ Conflict-of-interest detection
 - 🚫 Anti-overstatement reasoning for absolute claims
 - 🧠 Claude-powered scientific reasoning
+- 📊 Interactive React + TypeScript dashboard
+- 🐍 FastAPI backend with REST endpoints
+- 🗄️ SQLite (n8n) + Supabase (results) architecture
 - 📊 Interactive React dashboard
 - 🗄️ PostgreSQL asynchronous job architecture
 - 📧 Automated email reports
+- 🧪 26 passing tests with Vitest
+- 📚 Interactive API documentation (Swagger UI)
 
 ---
 
@@ -289,6 +297,11 @@ EvidenceCheck-AI/
 ├── LICENSE
 ├── .env.example
 │
+├── backend/                    # 🆕 FastAPI backend
+│   ├── main.py                 # API endpoints
+│   ├── requirements.txt        # Python dependencies
+│   └── venv/                   # Virtual environment
+│
 ├── workflows/
 │   ├── EvidenceCheck_API_Submit_Analysis_Job.json
 │   ├── EvidenceCheck_AI_Pipeline_Principal_Claude.json
@@ -299,7 +312,11 @@ EvidenceCheck-AI/
 │   └── schema.sql
 │
 ├── dashboard/
-│   ├── src/
+│   ├── src/                    # 🆕 TypeScript source
+│   │   ├── App.tsx             # Main component
+│   │   ├── App.test.tsx        # Tests
+│   │   └── *.test.ts           # 26 unit tests
+│   ├── vitest.config.ts        # 🆕 Vitest configuration
 │   ├── package.json
 │   └── vite.config.js
 │
@@ -336,14 +353,19 @@ LinkedIn Demo Video:
 
 * n8n
 * PostgreSQL 13+
+* Python 3.12+
 * Anthropic API Key
 * Gmail account (optional)
 * Node.js 20+
 
-### 2. Configure Database
+### 2. Configure FastAPI Backend
 
 ```bash
-psql -U postgres -f database/schema.sql
+cd backend
+python -m venv venv
+source venv/bin/activate  # or: venv\Scripts\activate (Windows)
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
 ```
 
 ### 3. Import Workflows
@@ -358,11 +380,17 @@ Import all workflows from the `workflows/` folder.
 
 ### 4. Configure Environment Variables
 
-Copy:
+Create .env file in backend/ folder:
 
-```bash
-cp .env.example .env
-```
+env
+N8N_WEBHOOK=https://n8n.yourdomain.com/webhook/evidence-check-submit
+N8N_JOBS_URL=https://n8n.yourdomain.com/webhook/evidence-check-jobs
+N8N_RESULT_URL=https://n8n.yourdomain.com/webhook/your-webhook-id/evidence-check-result
+For n8n, create .env in n8n/ folder:
+
+env
+DB_PASSWORD=
+N8N_ENCRYPTION_KEY=
 
 and configure the required values.
 
@@ -375,6 +403,14 @@ npm install
 
 npm run dev
 ```
+
+### 6. Access the System
+
+Service	                   URL
+Dashboard	               http://localhost:5173
+FastAPI Swagger UI	       http://localhost:8000/docs
+FastAPI API	               http://localhost:8000
+n8n	                       https://n8n.yourdomain.com
 
 ---
 
@@ -409,6 +445,8 @@ VITE_EVIDENCECHECK_RESULT_JOB_PATH=
 * Scientific article inspection
 * Search and filtering
 * Interactive evidence balance charts
+* Bilingual (ES/EN)
+* TypeScript type safety
 
 ---
 
