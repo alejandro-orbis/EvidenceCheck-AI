@@ -238,10 +238,10 @@ The objective is to reduce common failure modes observed in generic LLM-based fa
 ```mermaid
 flowchart TD
 
-A[React Dashboard]
---> B[Submit Analysis Job API]
+A[React + TypeScript Dashboard]
+--> B[FastAPI Backend]
 
-B --> C[PostgreSQL Jobs]
+B --> C[n8n Webhook]
 
 C --> D[EvidenceCheck Pipeline]
 
@@ -252,10 +252,12 @@ D --> H[Directionality Engine]
 D --> I[Bradford Hill Signals]
 D --> J[Claude Reasoning]
 
-J --> K[Store Results]
+J --> K[Store Results in Supabase]
 
-K --> L[Dashboard]
+K --> L[Dashboard Polls Results]
 K --> M[Email Reports]
+
+B --> N[Swagger UI /docs]
 ```
 
 ---
@@ -275,10 +277,14 @@ K --> M[Email Reports]
 
 | Technology | Purpose |
 |------------|---------|
+| FastAPI | Backend API (REST endpoints) |
+| TypeScript | Frontend type safety |
+| Vitest | Unit testing (26 tests) |
 | n8n | Workflow orchestration |
 | Claude | Scientific reasoning |
 | PubMed | Literature retrieval |
-| PostgreSQL | Asynchronous job storage |
+| SQLite | n8n local storage |
+| Supabase | Result persistence |
 | React | Dashboard UI |
 | Vite | Frontend tooling |
 | Recharts | Analytics and visualization |
@@ -380,17 +386,20 @@ Import all workflows from the `workflows/` folder.
 
 ### 4. Configure Environment Variables
 
-Create .env file in backend/ folder:
+Create `.env` file in `backend/` folder:
 
-env
+```env
 N8N_WEBHOOK=https://n8n.yourdomain.com/webhook/evidence-check-submit
 N8N_JOBS_URL=https://n8n.yourdomain.com/webhook/evidence-check-jobs
 N8N_RESULT_URL=https://n8n.yourdomain.com/webhook/your-webhook-id/evidence-check-result
-For n8n, create .env in n8n/ folder:
+```
 
-env
+For n8n, create `.env` in `n8n/` folder:
+
+```env
 DB_PASSWORD=
 N8N_ENCRYPTION_KEY=
+```
 
 and configure the required values.
 
@@ -406,11 +415,12 @@ npm run dev
 
 ### 6. Access the System
 
-Service	                   URL
-Dashboard	               http://localhost:5173
-FastAPI Swagger UI	       http://localhost:8000/docs
-FastAPI API	               http://localhost:8000
-n8n	                       https://n8n.yourdomain.com
+| Service | URL |
+|---------|-----|
+| Dashboard | http://localhost:5173 |
+| FastAPI Swagger UI | http://localhost:8000/docs |
+| FastAPI API | http://localhost:8000 |
+| n8n | https://n8n.yourdomain.com |
 
 ---
 
@@ -475,6 +485,28 @@ The platform performs a multi-stage evidence evaluation process:
 
 ---
 
+## 🧪 Testing
+
+Run dashboard tests:
+
+```bash
+cd dashboard
+npm run test
+```
+
+Tests cover:
+
+* Verdict normalization
+* Consensus normalization
+* Badge classes
+* Card styling
+* KPIs calculation
+* Search filtering
+* Time formatting
+* Translations
+
+---
+
 ## 🛡️ Security
 
 * Do not upload `.env` files
@@ -493,7 +525,6 @@ The platform performs a multi-stage evidence evaluation process:
 * Cochrane integration
 * WHO evidence sources
 * NICE guideline integration
-* Multi-language dashboard
 * User authentication
 * Historical evidence tracking
 * Public API
