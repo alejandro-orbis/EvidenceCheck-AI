@@ -19,13 +19,13 @@ jobs:
       with:
         node-version: '22'
 
-    - name: Verify package-lock.json versions
+    - name: Verify package-lock.json version
       run: |
         cd dashboard
         echo "Checking react-dom version in package-lock.json:"
         grep -A2 '"react-dom"' package-lock.json | head -5
 
-    - name: Clean install with lockfile
+    - name: Clean install
       run: |
         cd dashboard
         rm -rf node_modules
