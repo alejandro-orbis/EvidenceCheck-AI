@@ -258,8 +258,7 @@ K --> M[Informes por Email]
 
 B --> N[Swagger UI /docs]
 ```
-Nota arquitectónica: n8n utiliza SQLite como base de datos interna para la configuración del sistema, ejecuciones y credenciales. EvidenceCheck utiliza PostgreSQL/Supabase como capa de persistencia de negocio para jobs, claims, resultados y consultas realizadas por los workflows.
-
+> **Nota arquitectónica:** n8n utiliza SQLite como base de datos interna para la configuración del sistema, ejecuciones y credenciales. EvidenceCheck utiliza PostgreSQL/Supabase como capa de persistencia de negocio para jobs, claims, resultados y consultas realizadas por los workflows.
 ---
 
 ## ⚙️ Workflows Principales
