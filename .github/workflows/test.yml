@@ -6,32 +6,30 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: dashboard/package-lock.json
 
-    - name: Verify package-lock.json version
-      run: |
-        cd dashboard
-        echo "Checking react-dom version in package-lock.json:"
-        grep -A2 '"react-dom"' package-lock.json | head -5
+      - name: Clean install
+        run: |
+          cd dashboard
+          npm ci
 
-    - name: Clean install
-      run: |
-        cd dashboard
-        rm -rf node_modules
-        npm ci
-
-    - name: Run tests
-      run: |
-        cd dashboard
-        npm run test -- --run
+      - name: Run tests
+        run: |
+          cd dashboard
+          npm run test
