@@ -10,7 +10,7 @@ Built as a real-world biomedical evidence verification platform.
 ![Dashboard](screenshots/dashboard-home.png)
 
 [![n8n](https://img.shields.io/badge/n8n-Workflow-orange?style=flat-square)](https://n8n.io/)
-[![Claude](https://img.shields.io/badge/Claude-AI-000000?style=flat-square)](https://anthropic.com)
+[![Gemini](https://img.shields.io/badge/Claude-AI-000000?style=flat-square)](https://anthropic.com)
 [![PubMed](https://img.shields.io/badge/PubMed-NCBI-326599?style=flat-square)](https://pubmed.ncbi.nlm.nih.gov/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
