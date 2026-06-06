@@ -13,7 +13,8 @@ Desarrollado como una plataforma real de verificación de evidencia biomédica.
 [![Google Gemini](https://img.shields.io/badge/Google-Gemini-4285F4?style=flat-square&logo=google)](https://ai.google.dev/)
 [![PubMed](https://img.shields.io/badge/PubMed-NCBI-326599?style=flat-square)](https://pubmed.ncbi.nlm.nih.gov/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat-square&logo=docker)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 ![Evidencia Biomédica](https://img.shields.io/badge/Biomédica-Análisis%20de%20Evidencia-blue?style=flat-square)
@@ -237,26 +238,26 @@ El objetivo es reducir los fallos comunes observados en sistemas genéricos de v
 ```mermaid
 flowchart TD
 
-A[Dashboard React + TypeScript]
---> B[Backend FastAPI]
+A[React Dashboard<br/>Docker]
+--> B[FastAPI Backend<br/>Docker]
 
-B --> C[Webhook n8n]
+B --> C[n8n Orchestration Engine<br/>Docker]
 
-C --> D[Pipeline EvidenceCheck]
+C --> D[EvidenceCheck Pipeline]
 
-D --> E[Recuperación PubMed]
-D --> F[Clasificación de Estudios]
-D --> G[Clasificación de Evidencia]
-D --> H[Motor de Direccionalidad]
-D --> I[Señales Bradford Hill]
-D --> J[Razonamiento Claude]
+D --> E[PubMed Retrieval]
+D --> F[Study Classification]
+D --> G[Evidence Ranking Engine]
+D --> H[Directionality Engine]
+D --> I[Bradford Hill Signals]
+D --> J[Gemini Analysis]
 
-J --> K[Almacenar Resultados en Supabase]
+J --> K[(Supabase PostgreSQL)]
 
-K --> L[Dashboard Consulta Resultados]
-K --> M[Informes por Email]
+K --> L[Dashboard Results]
+K --> M[Email Reports]
 
-B --> N[Swagger UI /docs]
+B --> N[Swagger UI<br/>/docs]
 ```
 > **Nota arquitectónica:** n8n utiliza SQLite como base de datos interna para la configuración del sistema, ejecuciones y credenciales. EvidenceCheck utiliza PostgreSQL/Supabase como capa de persistencia de negocio para jobs, claims, resultados y consultas realizadas por los workflows.
 ---
@@ -276,11 +277,12 @@ B --> N[Swagger UI /docs]
 
 | Tecnología | Propósito |
 |------------|---------|
+| Docker | Contenerización y despliegue |
 | FastAPI | API Backend (endpoints REST) |
 | TypeScript | Tipado seguro en frontend |
 | Vitest | Tests unitarios (26 tests) |
 | n8n | Orquestación de workflows |
-| Claude | Razonamiento científico |
+| Gemini | Razonamiento científico |
 | PubMed | Recuperación de literatura |
 | SQLite | Almacenamiento local de n8n |
 | Supabase | Persistencia de resultados |
@@ -297,40 +299,23 @@ B --> N[Swagger UI /docs]
 ```text
 EvidenceCheck-AI/
 │
+├── .github/
+│   └── workflows/      # CI/CD pipelines
+│
+├── backend/            # FastAPI backend API
+│
+├── dashboard/          # React + TypeScript frontend
+│
+├── database/           # SQL schemas and migrations
+│
+├── workflows/          # n8n automation workflows
+│
+├── screenshots/        # Project screenshots
+│
 ├── README.md
 ├── README_ES.md
-├── LICENSE
-├── .env.example
-│
-├── backend/                    # Backend FastAPI
-│   ├── main.py                 # Endpoints de la API
-│   ├── requirements.txt        # Dependencias Python
-│   └── venv/                   # Entorno virtual
-│
-├── workflows/
-│   ├── EvidenceCheck_API_Submit_Analysis_Job.json
-│   ├── EvidenceCheck_AI_Pipeline_Principal_Claude.json
-│   ├── EvidenceCheck_Get_Job_Result.json
-│   └── EvidenceCheck_List_Jobs.json
-│
-├── database/
-│   └── schema.sql
-│
-├── dashboard/
-│   ├── src/                    # Código fuente TypeScript
-│   │   ├── App.tsx             # Componente principal
-│   │   ├── App.test.tsx        # Tests
-│   │   └── *.test.ts           # 26 tests unitarios
-│   ├── vitest.config.ts        # Configuración Vitest
-│   ├── package.json
-│   └── vite.config.js
-│
-└── screenshots/
-    ├── dashboard-home.png
-    ├── analysis-list.png
-    ├── analysis-detail.png
-    ├── email-report.png
-    └── architecture-pipeline.png
+├── SECURITY.md
+└── LICENSE
 ```
 ---
 
@@ -355,22 +340,27 @@ Vídeo Demo en LinkedIn:
 
 ### 1. Requisitos
 
+* Docker Desktop
 * n8n
-* PostgreSQL 13+
-* Python 3.12+
-* Clave API de Anthropic
-* Cuenta Gmail (opcional)
-* Node.js 20+
+* Cuenta Supabase / PostgreSQL
+* Google Gemini API key
+* Cuenta Gmail opcional para informes por email
 
-### 2. Configurar Backend FastAPI
+### 2. Configurar Variables de Entorno
 
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # o: venv\Scripts\activate (Windows)
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+Crea un archivo `.env` en la carpeta `backend/`:
+
+```env
+N8N_WEBHOOK=https://n8n.tudominio.com/webhook/evidence-check-submit
+N8N_JOBS_URL=https://n8n.tudominio.com/webhook/evidence-check-jobs
+N8N_RESULT_URL=https://n8n.tudominio.com/webhook/evidence-check-result
 ```
+Para n8n, configura las credenciales necesarias desde la interfaz de n8n:
+
+* Google Gemini API
+* PostgreSQL / Supabase
+* Gmail OAuth opcional
+* WhatsApp opcional
 
 ### 3. Importar Workflows
 
@@ -382,42 +372,28 @@ Menú → Importar desde archivo
 
 Importa todos los workflows de la carpeta `workflows/`.
 
-### 4. Configurar Variables de Entorno
+### 4. Ejecutar con Docker
 
-Crea el archivo `.env` en la carpeta `backend/`:
-
-```env
-N8N_WEBHOOK=https://n8n.tudominio.com/webhook/evidence-check-submit
-N8N_JOBS_URL=https://n8n.tudominio.com/webhook/evidence-check-jobs
-N8N_RESULT_URL=https://n8n.tudominio.com/webhook/tu-webhook-id/evidence-check-result
-```
-
-Para n8n, crea `.env` en la carpeta `n8n/`:
-
-```env
-DB_PASSWORD=
-N8N_ENCRYPTION_KEY=
-```
-
-y configura los valores requeridos.
-
-### 5. Ejecutar el Dashboard
+Desde la carpeta donde tengas tu docker-compose.yml:
 
 ```bash
-cd dashboard
-
-npm install
-
-npm run dev
+docker compose up -d --build
 ```
 
-### 6. Acceder al Sistema
+Esto levanta:
+
+* Dashboard React
+* Backend FastAPI
+* n8n
+
+### 5. Acceder al Sistema
 
 | Servicio | URL |
 |---------|-----|
 | Dashboard | http://localhost:5173 |
 | FastAPI Swagger UI | http://localhost:8000/docs |
 | FastAPI API | http://localhost:8000 |
+| n8n (local) | http://localhost:5678 |
 | n8n | https://n8n.tudominio.com |
 
 ---
@@ -425,7 +401,23 @@ npm run dev
 ## 🔐 Variables de Entorno
 
 ```env
-ANTHROPIC_API_KEY=
+# =========================
+# GOOGLE GEMINI
+# =========================
+
+GEMINI_API_KEY=
+
+# =========================
+# FASTAPI BACKEND
+# =========================
+
+N8N_WEBHOOK=
+N8N_JOBS_URL=
+N8N_RESULT_URL=
+
+# =========================
+# POSTGRESQL / SUPABASE
+# =========================
 
 POSTGRES_HOST=
 POSTGRES_PORT=
@@ -433,7 +425,9 @@ POSTGRES_DB=
 POSTGRES_USER=
 POSTGRES_PASSWORD=
 
-EVIDENCECHECK_PIPELINE_URL=
+# =========================
+# REACT DASHBOARD
+# =========================
 
 VITE_EVIDENCECHECK_API_BASE=
 VITE_EVIDENCECHECK_LIST_JOBS_PATH=
