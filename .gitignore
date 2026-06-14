@@ -147,10 +147,6 @@ vite.config.ts.timestamp-*
 
 # Python
 __pycache__/
-venv/
-
-# Python
-__pycache__/
 *.pyc
 venv/
 .venv/
@@ -158,8 +154,9 @@ venv/
 # Benchmark outputs
 benchmarks/*.json
 
-# Benchmark caches
+# Benchmark caches and historical results
 benchmarks/__pycache__/
+benchmarks/baselines/
 
 # Environment
 .env
@@ -168,4 +165,3 @@ benchmarks/__pycache__/
 # Local artifacts
 *.sqlite
 *.db
- 
