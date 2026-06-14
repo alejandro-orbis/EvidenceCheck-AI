@@ -134,7 +134,7 @@ Por lo tanto, la afirmación no puede considerarse universalmente verdadera y de
 - 🧪 Señales de inferencia causal de Bradford Hill
 - 🛡️ Detección de conflictos de interés
 - 🚫 Razonamiento anti-sobreestimación para afirmaciones absolutas
-- 🧠 Razonamiento científico impulsado por Claude
+- 🧠 Razonamiento científico impulsado por Gemini
 - 📊 Dashboard interactivo con React + TypeScript
 - 🐍 Backend FastAPI con endpoints REST
 - 🗄️ Arquitectura SQLite (n8n) + Supabase (resultados)
@@ -142,6 +142,27 @@ Por lo tanto, la afirmación no puede considerarse universalmente verdadera y de
 - 📧 Informes automáticos por email
 - 🧪 26 tests pasando con Vitest
 - 📚 Documentación interactiva de la API (Swagger UI)
+
+---
+
+## 🧪 Benchmark Framework
+
+EvidenceCheck AI v2.0 incluye un sistema de benchmark reproducible para evaluar cambios del pipeline sin ir a ciegas.
+
+Evalúa:
+
+- Exactitud del veredicto
+- Calibración de confianza
+- Clasificación del consenso científico
+- Patrones de fallo
+- Regresiones después de cambios
+
+Archivos principales:
+
+- `benchmarks/benchmark_runner.py`
+- `benchmarks/benchmark_core.csv`
+- `benchmarks/benchmark_niche.csv`
+- `benchmarks/BENCHMARK_README.pdf`
 
 ---
 
@@ -304,6 +325,8 @@ EvidenceCheck-AI/
 │
 ├── backend/            # FastAPI backend API
 │
+├── benchmarks/         # Benchmark runner, benchmark_core y benchmark_niche
+|
 ├── dashboard/          # React + TypeScript frontend
 │
 ├── database/           # SQL schemas and migrations
@@ -374,7 +397,7 @@ Importa todos los workflows de la carpeta `workflows/`.
 
 ### 4. Ejecutar con Docker
 
-Desde la carpeta donde tengas tu docker-compose.yml:
+cp docker-compose.example.yml docker-compose.yml
 
 ```bash
 docker compose up -d --build
@@ -470,7 +493,7 @@ La plataforma realiza un proceso de evaluación de evidencia en múltiples etapa
 12. Análisis de especificidad de la afirmación
 13. Evaluación causal de Bradford Hill
 14. Detección de contradicciones
-15. Razonamiento científico con Claude
+15. Razonamiento científico con Gemini
 16. Generación del informe en el dashboard
 17. Persistencia de resultados
 18. Generación de informe por email
@@ -507,7 +530,7 @@ Los tests cubren:
 * Elimina credenciales antes de exportar workflows
 * Elimina IDs de webhooks antes de publicar
 * Sanitiza las exportaciones de workflows antes de publicar en GitHub
-* Mantén las claves API de Anthropic en privado
+* Mantén las claves API del proveedor LLM en privado
 * Usa credenciales separadas por entorno
 
 ---
@@ -515,22 +538,30 @@ Los tests cubren:
 ## 🗺️ Hoja de Ruta
 
 ### ✅ Completado
-- Integración del backend FastAPI
-- Migración a TypeScript
-- 26 tests pasando con Vitest
-- Dashboard bilingüe (ES/EN)
-- Documentación interactiva de la API (Swagger UI)
+- Benchmark Runner v2.1 para detección automática de regresiones
+- benchmark_core.csv con 25 claims biomédicos de alto consenso
+- benchmark_niche.csv con 15 claims biomédicos de alta incertidumbre científica
+- Export del workflow principal EvidenceCheck AI v2.0
+- Workflow interno de ejecución de benchmarks
+- Biomedical Directionality Engine
+- Evidence Consensus Builder
+- Claim Decomposition Engine
+- Dashboard interactivo con React + TypeScript
+- Backend FastAPI con endpoints REST y Swagger UI
+- Persistencia histórica de análisis y resultados con Supabase
+- Arquitectura Docker + n8n + FastAPI + React
+- Detección de conflictos de interés
+- Señales de inferencia causal de Bradford Hill
 
 ### 🔄 Planificado
 - Integración con Cochrane
 - Fuentes de evidencia de la OMS
 - Integración de guías NICE
-- Autenticación de usuarios
-- Seguimiento histórico de evidencia
-- API pública
-- Visualización avanzada de evidencia
-- Soporte multiusuario
 - ClinicalTrials.gov
+- API pública autenticada para terceros
+- Autenticación de usuarios
+- Soporte multiusuario
+- Versionado histórico de evidencia
 - Razonamiento basado en guías clínicas
 - Análisis de línea temporal de evidencia
 
