@@ -144,12 +144,28 @@ vite.config.ts.timestamp-*
 *.njsproj
 *.sln
 *.sw?
-. e n v 
- 
- * . p y c 
 
 # Python
 __pycache__/
 venv/
- 
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Benchmark outputs
+benchmarks/*.json
+
+# Benchmark caches
+benchmarks/__pycache__/
+
+# Environment
+.env
+.env.*
+
+# Local artifacts
+*.sqlite
+*.db
  
