@@ -1,0 +1,50 @@
+services:
+  n8n:
+    image: n8nio/n8n
+    container_name: evidencecheck_n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    env_file:
+      - .env.example
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - N8N_PROXY_HOPS=1
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - evidencecheck_network
+
+  api:
+    build: ./backend
+    container_name: evidencecheck_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env.example
+    networks:
+      - evidencecheck_network
+    depends_on:
+      - n8n
+
+  dashboard:
+    build: ./dashboard
+    container_name: evidencecheck_dashboard
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    networks:
+      - evidencecheck_network
+    depends_on:
+      - api
+
+networks:
+  evidencecheck_network:
+    driver: bridge
+
+volumes:
+  n8n_data:
