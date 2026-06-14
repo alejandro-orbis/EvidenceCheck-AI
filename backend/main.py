@@ -11,7 +11,6 @@ load_dotenv()
 
 app = FastAPI(title="EvidenceCheck AI API", version="1.0.0")
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://localhost:5174"],
@@ -20,7 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Modelos
 class ClaimRequest(BaseModel):
     claim: str
     language: str = "es"
@@ -29,18 +27,20 @@ class JobResponse(BaseModel):
     job_id: str
     status: str
 
-# Configuración (SIN valores por defecto - usar .env)
 N8N_WEBHOOK = os.getenv("N8N_WEBHOOK")
 N8N_JOBS_URL = os.getenv("N8N_JOBS_URL")
 N8N_RESULT_URL = os.getenv("N8N_RESULT_URL")
 
-# Validar que existen las variables de entorno
-if not all([N8N_WEBHOOK, N8N_JOBS_URL, N8N_RESULT_URL]):
-    raise ValueError("Missing required environment variables: N8N_WEBHOOK, N8N_JOBS_URL, N8N_RESULT_URL")
+N8N_HEADERS = {
+    "Accept": "application/json",
+    "Accept-Encoding": "identity",
+}
 
-# ============================================
-# Endpoints
-# ============================================
+if not all([N8N_WEBHOOK, N8N_JOBS_URL, N8N_RESULT_URL]):
+    raise ValueError(
+        "Missing required environment variables: "
+        "N8N_WEBHOOK, N8N_JOBS_URL, N8N_RESULT_URL"
+    )
 
 @app.get("/health")
 async def health_check():
@@ -48,75 +48,136 @@ async def health_check():
 
 @app.post("/analysis", response_model=JobResponse)
 async def create_analysis(claim_request: ClaimRequest):
-    """Envía un claim a n8n para procesamiento"""
-    
     print("=" * 70)
-    print(f"📥 [IDA] NUEVO CLAIM RECIBIDO EN FASTAPI")
+    print("📥 [IDA] NUEVO CLAIM RECIBIDO EN FASTAPI")
     print(f"   🕐 Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"   📝 Claim: {claim_request.claim}")
     print(f"   🌐 Idioma: {claim_request.language}")
     print("=" * 70)
-    
-    async with httpx.AsyncClient() as client:
+
+    async with httpx.AsyncClient(verify=False) as client:
         response = await client.post(
             N8N_WEBHOOK,
             json={
                 "claim": claim_request.claim,
-                "language": claim_request.language
+                "language": claim_request.language,
             },
-            timeout=30.0
+            headers=N8N_HEADERS,
+            timeout=30.0,
         )
+
         if response.status_code != 200:
             print(f"❌ ERROR: n8n respondió con status {response.status_code}")
+            print(response.text[:1000])
             raise HTTPException(status_code=500, detail="Error al enviar a n8n")
-        
-        data = response.json()
+
+        try:
+            data = response.json()
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": "n8n no devolvió JSON en /analysis",
+                    "status_code": response.status_code,
+                    "content_type": response.headers.get("content-type"),
+                    "body_start": response.text[:500],
+                },
+            )
+
         job_id = data.get("job_id")
         status = data.get("status", "processing")
-        
-        print(f"✅ [VUELTA] CLAIM ENVIADO A N8N CORRECTAMENTE")
+
+        print("✅ [VUELTA] CLAIM ENVIADO A N8N CORRECTAMENTE")
         print(f"   🆔 Job ID: {job_id}")
         print(f"   📊 Status: {status}")
         print("=" * 70)
         print("")
-        
+
         return JobResponse(job_id=job_id, status=status)
 
 @app.get("/jobs")
 async def get_jobs(language: Optional[str] = None):
-    """Obtiene la lista de análisis (opcionalmente filtrados por idioma)"""
-    
-    print(f"📋 [CONSULTA] Listando jobs - Idioma: {language if language else 'todos'}")
-    
+    print(
+        f"📋 [CONSULTA] Listando jobs - Idioma: "
+        f"{language if language else 'todos'}"
+    )
+
     url = f"{N8N_JOBS_URL}"
     if language:
         url += f"?language={language}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, timeout=30.0)
+
+    async with httpx.AsyncClient(verify=False) as client:
+        response = await client.get(
+            url,
+            headers=N8N_HEADERS,
+            timeout=30.0,
+        )
+
+        print(f"📡 n8n jobs URL: {url}")
+        print(f"📡 n8n jobs status: {response.status_code}")
+        print(f"📡 n8n jobs content-type: {response.headers.get('content-type')}")
+        print("📡 n8n jobs response:")
+        print(response.text[:2000])
+
         if response.status_code != 200:
             raise HTTPException(status_code=500, detail="Error al obtener jobs")
-        return response.json()
+
+        try:
+            return response.json()
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": "n8n no devolvió JSON",
+                    "status_code": response.status_code,
+                    "content_type": response.headers.get("content-type"),
+                    "body_start": response.text[:500],
+                },
+            )
 
 @app.get("/result/{job_id}")
 async def get_result(job_id: str):
-    """Obtiene el resultado de un análisis completado"""
-    
     print(f"🔍 [CONSULTA] Buscando resultado para job_id: {job_id}")
-    
-    async with httpx.AsyncClient() as client:
-        response = await client.get(f"{N8N_RESULT_URL}/{job_id}", timeout=30.0)
+
+    async with httpx.AsyncClient(verify=False) as client:
+        response = await client.get(
+            N8N_RESULT_URL,
+            params={"job_id": job_id},
+            headers=N8N_HEADERS,
+            timeout=30.0,
+        )
+
         if response.status_code != 200:
             print(f"❌ [ERROR] No se encontró resultado para {job_id}")
-            raise HTTPException(status_code=404, detail="Job no encontrado o no completado")
-        
-        data = response.json()
-        
+            print(f"Status: {response.status_code}")
+            print(response.text[:1000])
+            raise HTTPException(
+                status_code=404,
+                detail="Job no encontrado o no completado",
+            )
+
+        try:
+            data = response.json()
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": "n8n no devolvió JSON en /result",
+                    "status_code": response.status_code,
+                    "content_type": response.headers.get("content-type"),
+                    "body_start": response.text[:500],
+                },
+            )
+
         if data.get("status") == "completed":
             print(f"✅ [RESULTADO] Job {job_id} completado")
             print(f"   🏆 Veredicto: {data.get('verdict', 'N/A')}")
             print(f"   📊 Confianza: {data.get('confidence', 'N/A')}")
-            print(f"   📝 Resumen: {data.get('summary', 'N/A')[:100]}...")
+            print(f"   📝 Resumen: {str(data.get('summary', 'N/A'))[:100]}...")
         else:
-            print(f"⏳ [PENDIENTE] Job {job_id} aún en procesamiento: {data.get('status')}")
-        
+            print(
+                f"⏳ [PENDIENTE] Job {job_id} aún en procesamiento: "
+                f"{data.get('status')}"
+            )
+
         return data

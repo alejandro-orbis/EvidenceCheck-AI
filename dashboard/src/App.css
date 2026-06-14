@@ -858,3 +858,19 @@ h1 {
   outline: none;
 }
 
+.page {
+  min-height: 100vh;
+  padding: 56px;
+  max-width: 1380px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.lang-toggle {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  gap: 8px;
+}

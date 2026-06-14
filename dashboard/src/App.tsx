@@ -20,6 +20,7 @@ interface Article {
   pubmed_url?: string;
   url?: string;
   final_score?: number;
+  score?: number;
   relation_to_claim?: string;
 }
 
@@ -36,6 +37,28 @@ interface Job {
   updated_at: string;
   error: string | null;
   language?: string;
+  result?: {
+    verdict?: string;
+    confidence?: string;
+    consensus?: string;
+    summary?: string;
+    generated_at?: string;
+    detailed_analysis?: string;
+    evidence_consensus?: {
+      supporting_count: number;
+      contradicting_count: number;
+      neutral_or_unclear_count: number;
+    };
+    articles?: Article[];
+    causal_assessment?: {
+      main_reason?: string;
+      epidemiological_reasoning?: string;
+    };
+  };
+}
+
+// Interfaz para el detalle extendido
+interface JobDetail extends Job {
   result?: {
     verdict?: string;
     confidence?: string;
@@ -116,7 +139,6 @@ export const TRANSLATIONS: Record<Lang, any> = {
     detailedAnalysis: "🔬 Análisis Detallado",
     causalAssessment: "📊 Evaluación Causal",
     noCausal: "No hay datos causales disponibles.",
-    analysisNote: "⚠️ El contenido del análisis se genera en español independientemente del idioma de la interfaz.",
     verdictLabels: {
       VERDADERO: "🟢 VERDADERO",
       EXAGERADO: "🟡 EXAGERADO",
@@ -197,7 +219,6 @@ export const TRANSLATIONS: Record<Lang, any> = {
     detailedAnalysis: "🔬 Detailed Analysis",
     causalAssessment: "📊 Causal Assessment",
     noCausal: "No causal data available.",
-    analysisNote: "⚠️ Analysis content is generated in Spanish regardless of interface language.",
     verdictLabels: {
       VERDADERO: "🟢 TRUE",
       EXAGERADO: "🟡 EXAGGERATED",
@@ -325,7 +346,7 @@ export function getElapsedTime(createdAt: string) {
 // ============================================
 function LangToggle({ lang, onChange }: { lang: Lang; onChange: (lang: Lang) => void }) {
   return (
-    <div style={{ display: "flex", gap: "8px", position: "fixed", top: "20px", right: "24px", zIndex: 1000 }}>
+    <div className="lang-toggle">
       <button
         onClick={() => onChange("es")}
         style={{
@@ -361,13 +382,10 @@ function LangToggle({ lang, onChange }: { lang: Lang; onChange: (lang: Lang) => 
 // ============================================
 // Article card (subcomponente reutilizable)
 // ============================================
-function ArticleLink({ article, accent, compact = false, scoreLabel }: { 
-  article: Article; 
-  accent: string; 
-  compact?: boolean; 
-  scoreLabel: string;
-}) {
+function ArticleLink({ article, accent, compact = false, scoreLabel }) {
+  const articleScore = article.final_score ?? article.score ?? 0;
   const pubmedUrl = article.pubmed_url || article.url || `https://pubmed.ncbi.nlm.nih.gov/${article.pmid}/`;
+  
   return (
     <a
       href={pubmedUrl}
@@ -389,11 +407,9 @@ function ArticleLink({ article, accent, compact = false, scoreLabel }: {
         <span style={{ background: "rgba(0,0,0,0.5)", padding: "3px 8px", borderRadius: "10px", color: "var(--muted)" }}>
           PMID {article.pmid}
         </span>
-        {article.final_score !== undefined && (
-          <span style={{ background: "rgba(0,0,0,0.5)", padding: "3px 8px", borderRadius: "10px", color: "var(--muted)" }}>
-            {scoreLabel} {Number(article.final_score).toFixed(2)}
-          </span>
-        )}
+        <span style={{ background: "rgba(0,0,0,0.5)", padding: "3px 8px", borderRadius: "10px", color: "var(--muted)" }}>
+          {scoreLabel} {Number(articleScore).toFixed(2)}
+        </span>
       </div>
     </a>
   );
@@ -413,14 +429,14 @@ function App() {
   const handleLangChange = (newLang: Lang) => {
     setLang(newLang);
     localStorage.setItem("ec_lang", newLang);
-    setJobs([]);
+    setJobs([] as Job[]);
     setSelectedJob(null);
     setSearchTerm("");
     setError(null);
   };
 
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingJobId, setLoadingJobId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -431,7 +447,11 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const pollingIntervals = useRef<{ [key: string]: NodeJS.Timeout }>({});
+  const [showAllSupport, setShowAllSupport] = useState(false);
+  const [showAllContradict, setShowAllContradict] = useState(false);
+  const [showAllNeutral, setShowAllNeutral] = useState(false);
+
+  const pollingIntervals = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
 
   // 🔥 MODIFICADO: Ahora usa /jobs de FastAPI
   const loadJobs = useCallback(async () => {
@@ -456,6 +476,14 @@ function App() {
     loadJobs();
   }, [loadJobs]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadJobs();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [loadJobs]);
+
   // Polling para jobs en procesamiento
   useEffect(() => {
     const processingJobs = jobs.filter(job => job.status === "processing");
@@ -469,19 +497,19 @@ function App() {
           const res = await fetch(`${API_BASE}/result/${job.job_id}`);
           const data = await res.json();
           if (data.status !== "processing") {
-            clearInterval(pollingIntervals.current[job.job_id]);
+            clearInterval(pollingIntervals.current[job.job_id] as number);
             delete pollingIntervals.current[job.job_id];
             loadJobs();
           }
         } catch {
-          clearInterval(pollingIntervals.current[job.job_id]);
+          clearInterval(pollingIntervals.current[job.job_id] as number);
           delete pollingIntervals.current[job.job_id];
         }
       }, 3000);
     });
 
     return () => {
-      Object.values(pollingIntervals.current).forEach(clearInterval);
+      Object.values(pollingIntervals.current).forEach(interval => clearInterval(interval as number));
       pollingIntervals.current = {};
     };
   }, [jobs, loadJobs]);
@@ -496,7 +524,7 @@ function App() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const jobMeta = jobs.find(j => j.job_id === jobId);
-      setSelectedJob({ ...jobMeta, ...data });
+      setSelectedJob({ ...jobMeta, ...data } as JobDetail);
     } catch {
       setError(t.detailError);
     } finally {
@@ -581,21 +609,47 @@ function App() {
   const consensus = detail?.evidence_consensus;
   const articles: Article[] = detail?.articles || [];
 
-  const totalDirectional = (consensus?.supporting_count || 0) + (consensus?.contradicting_count || 0);
-  const supportsPercent = totalDirectional > 0 ? (consensus.supporting_count / totalDirectional) * 100 : 0;
-  const contradictsPercent = totalDirectional > 0 ? (consensus.contradicting_count / totalDirectional) * 100 : 0;
-
-  const supportingArticles = articles.filter(a => a.relation_to_claim === "SUPPORTS_CLAIM");
-  const contradictingArticles = articles.filter(a => a.relation_to_claim === "CONTRADICTS_CLAIM");
-  const neutralArticles = articles.filter(
-    a => a.relation_to_claim === "DOES_NOT_SUPPORT_CLAIM" || a.relation_to_claim === "UNCLEAR" || !a.relation_to_claim
+  const supportingArticles = articles.filter(
+    a => a.relation_to_claim === "SUPPORTS_CLAIM"
   );
 
-  return (
-    <main className="page">
-      <LangToggle lang={lang} onChange={handleLangChange} />
+  const contradictingArticles = articles.filter(
+    a => a.relation_to_claim === "CONTRADICTS_CLAIM"
+  );
 
-      <header className="header">
+  const neutralArticles = articles.filter(
+    a =>
+      a.relation_to_claim === "DOES_NOT_SUPPORT_CLAIM" ||
+      a.relation_to_claim === "UNCLEAR" ||
+      a.relation_to_claim === "MIXED_OR_CONTEXT_DEPENDENT" ||
+      !a.relation_to_claim
+  );
+
+  const supportCount = supportingArticles.length;
+  const contradictCount = contradictingArticles.length;
+  const neutralCount = neutralArticles.length;
+
+  const totalDirectional = supportCount + contradictCount;
+
+  const supportsPercent =
+    totalDirectional > 0
+      ? (supportCount / totalDirectional) * 100
+      : 0;
+
+  const contradictsPercent =
+    totalDirectional > 0
+      ? (contradictCount / totalDirectional) * 100
+      : 0;
+
+return (
+  <main className="page">
+
+    <LangToggle
+      lang={lang}
+      onChange={handleLangChange}
+    />
+
+    <header className="header">
         <p className="eyebrow">{t.eyebrow}</p>
         <h1>{t.title}</h1>
         <p className="subtitle">{t.subtitle}</p>
@@ -627,19 +681,17 @@ function App() {
               <span className={`badge ${badgeClass(selectedJob.status)}`}>
                 {selectedJob.status}
               </span>
-              <h2>{selectedJob.claim || selectedJob.result?.claim || "—"}</h2>
+              <h2>{selectedJob.claim || detail?.claim || "—"}</h2>
             </div>
-            <div className={`detailVerdict verdict-${badgeClass(detail?.verdict)}`}>
+            <div className={`detailVerdict verdict-${badgeClass(detail?.verdict || "")}`}>
               <span>{t.verdict}</span>
-              <strong>{t.verdictLabels[normalizeVerdict(detail?.verdict)] || detail?.verdict || t.pending}</strong>
+              <strong>
+                {detail?.verdict
+                  ? (t.verdictLabels[normalizeVerdict(detail.verdict)] || detail.verdict)
+                  : t.pending}
+              </strong>
             </div>
           </div>
-
-          {lang === "en" && (
-            <p style={{ color: "var(--muted)", fontSize: "12px", margin: "8px 0 0", fontStyle: "italic" }}>
-              {t.analysisNote}
-            </p>
-          )}
 
           <div className="metrics detailMetrics">
             <div><span>{t.confidence}</span><strong>{detail?.confidence || "-"}</strong></div>
@@ -673,9 +725,9 @@ function App() {
                 </div>
               )}
               <div className="consensusGrid">
-                <div className="consensusBox supports"><span>{t.supports}</span><strong>{consensus.supporting_count ?? 0}</strong></div>
-                <div className="consensusBox contradicts"><span>{t.contradicts}</span><strong>{consensus.contradicting_count ?? 0}</strong></div>
-                <div className="consensusBox neutral"><span>{t.neutral}</span><strong>{consensus.neutral_or_unclear_count ?? 0}</strong></div>
+                <div className="consensusBox supports"><span>{t.supports}</span><strong>{supportCount}</strong></div>
+                <div className="consensusBox contradicts"><span>{t.contradicts}</span><strong>{contradictCount}</strong></div>
+                <div className="consensusBox neutral"><span>{t.neutral}</span><strong>{neutralCount}</strong></div>
               </div>
             </section>
           )}
@@ -692,9 +744,18 @@ function App() {
                 </h4>
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                   {supportingArticles.length > 0
-                    ? supportingArticles.map(a => <ArticleLink key={a.pmid} article={a} accent="var(--green)" scoreLabel={t.score} />)
+                    ? (showAllSupport ? supportingArticles : supportingArticles.slice(0, 5)).map(a => (
+                        <ArticleLink key={a.pmid} article={a} accent="var(--green)" scoreLabel={t.score} />
+                      ))
                     : <p style={{ color: "var(--muted)", fontStyle: "italic", textAlign: "center", padding: "20px" }}>{t.noSupporting}</p>
                   }
+                  {supportingArticles.length > 5 && (
+                    <button className="viewButton" onClick={() => setShowAllSupport(!showAllSupport)} style={{ marginTop: "12px" }}>
+                      {showAllSupport
+                        ? (lang === "es" ? "Mostrar menos" : "Show less")
+                        : (lang === "es" ? `Mostrar ${supportingArticles.length - 5} más` : `Show ${supportingArticles.length - 5} more`)}
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -707,33 +768,42 @@ function App() {
                 </h4>
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                   {contradictingArticles.length > 0
-                    ? contradictingArticles.map(a => <ArticleLink key={a.pmid} article={a} accent="var(--red)" scoreLabel={t.score} />)
+                    ? (showAllContradict ? contradictingArticles : contradictingArticles.slice(0, 5)).map(a => (
+                        <ArticleLink key={a.pmid} article={a} accent="var(--red)" scoreLabel={t.score} />
+                      ))
                     : <p style={{ color: "var(--muted)", fontStyle: "italic", textAlign: "center", padding: "20px" }}>{t.noContradicting}</p>
                   }
+                  {contradictingArticles.length > 5 && (
+                    <button className="viewButton" onClick={() => setShowAllContradict(!showAllContradict)} style={{ marginTop: "12px" }}>
+                      {showAllContradict
+                        ? (lang === "es" ? "Mostrar menos" : "Show less")
+                        : (lang === "es" ? `Mostrar ${contradictingArticles.length - 5} más` : `Show ${contradictingArticles.length - 5} more`)}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
 
-            {neutralArticles.length > 0 && (
-              <div style={{ marginTop: "24px" }}>
-                <details style={{ cursor: "pointer" }}>
-                  <summary style={{ color: "var(--muted)", fontSize: "13px" }}>
-                    {t.neutralArticles(neutralArticles.length)}
-                  </summary>
-                  <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {neutralArticles.map(a => (
-                      <a key={a.pmid} href={a.pubmed_url || `https://pubmed.ncbi.nlm.nih.gov/${a.pmid}/`} target="_blank" rel="noopener noreferrer"
-                        style={{ textDecoration: "none", background: "rgba(15,23,42,0.6)", borderRadius: "12px", padding: "12px", display: "block" }}>
-                        <span style={{ fontSize: "13px" }}>{a.title}</span>
-                        <div style={{ fontSize: "10px", color: "var(--muted)", marginTop: "6px" }}>
-                          PMID {a.pmid} · {t.score} {Number(a.final_score).toFixed(2)}
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </details>
-              </div>
-            )}
+{neutralArticles.length > 0 && (
+  <div style={{ marginTop: "24px" }}>
+    <details style={{ cursor: "pointer" }}>
+      <summary style={{ color: "var(--muted)", fontSize: "13px" }}>
+        {t.neutralArticles(neutralArticles.length)}
+      </summary>
+      <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "10px" }}>
+        {neutralArticles.map(a => (
+          <ArticleLink 
+            key={a.pmid} 
+            article={a} 
+            accent="#64748b" 
+            compact={true} 
+            scoreLabel={t.score} 
+          />
+        ))}
+      </div>
+    </details>
+  </div>
+)}
           </section>
 
           <section className="detailSection">
