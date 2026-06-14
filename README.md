@@ -134,7 +134,7 @@ As a result, the claim cannot be considered universally true and depends on popu
 - 🧪 Bradford Hill causal inference signals
 - 🛡️ Conflict-of-interest detection
 - 🚫 Anti-overstatement reasoning for absolute claims
-- 🧠 Claude-powered scientific reasoning
+- 🧠 Gemini-powered scientific reasoning
 - 📊 Interactive React + TypeScript dashboard
 - 🐍 FastAPI backend with REST endpoints
 - 🗄️ SQLite (n8n) + Supabase (results) architecture
@@ -142,6 +142,27 @@ As a result, the claim cannot be considered universally true and depends on popu
 - 📧 Automated email reports
 - 🧪 26 passing tests with Vitest
 - 📚 Interactive API documentation (Swagger UI)
+
+---
+
+## 🧪 Benchmark Framework
+
+EvidenceCheck AI v2.0 includes a reproducible benchmark framework to evaluate pipeline changes safely.
+
+It evaluates:
+
+- Verdict accuracy
+- Confidence calibration
+- Scientific consensus classification
+- Failure patterns
+- Regression detection
+
+Main files:
+
+- `benchmarks/benchmark_runner.py`
+- `benchmarks/benchmark_core.csv`
+- `benchmarks/benchmark_niche.csv`
+- `benchmarks/BENCHMARK_README.pdf`
 
 ---
 
@@ -282,7 +303,7 @@ B --> N[Swagger UI<br/>/docs]
 | TypeScript | Frontend type safety |
 | Vitest | Unit testing (26 tests) |
 | n8n | Workflow orchestration |
-| Claude | Scientific reasoning |
+| Gemini | Scientific reasoning |
 | PubMed | Literature retrieval |
 | SQLite | n8n local storage |
 | Supabase | Result persistence |
@@ -303,6 +324,8 @@ EvidenceCheck-AI/
 │   └── workflows/      # CI/CD pipelines
 │
 ├── backend/            # FastAPI backend API
+│
+├── benchmarks/         # Benchmark framework and datasets
 │
 ├── dashboard/          # React + TypeScript frontend
 │
@@ -376,9 +399,9 @@ Import all workflows from the `workflows/` folder.
 
 ### 4. Run with Docker
 
-From the folder where your docker-compose.yml is located:
-
 ```bash
+cp docker-compose.example.yml docker-compose.yml
+
 docker compose up -d --build
 ```
 
@@ -472,7 +495,7 @@ The platform performs a multi-stage evidence evaluation process:
 12. Claim specificity analysis
 13. Bradford Hill causal assessment
 14. Contradiction detection
-15. Claude scientific reasoning
+15. Gemini scientific reasoning
 16. Dashboard report generation
 17. Result persistence
 18. Email report generation
@@ -509,7 +532,7 @@ Tests cover:
 * Remove credentials before exporting workflows
 * Remove webhook IDs before publishing
 * Sanitize workflow exports before GitHub publication
-* Keep Anthropic API keys private
+* Keep your LLM provider API keys secure and private.
 * Use separate credentials per environment
 
 ---
@@ -517,22 +540,30 @@ Tests cover:
 ## 🗺️ Roadmap
 
 ### ✅ Completed
-- FastAPI backend integration
-- TypeScript migration
-- 26 passing tests with Vitest
-- Bilingual dashboard (ES/EN)
-- Interactive API documentation (Swagger UI)
+- Benchmark Runner for automated regression testing
+- `benchmark_core.csv` with 25 high-consensus biomedical claims
+- `benchmark_niche.csv` with 15 biomedical claims with substantial scientific uncertainty
+- EvidenceCheck AI v2.0 main workflow export
+- Internal benchmark execution workflow
+- Biomedical Directionality Engine
+- Evidence Consensus Builder
+- Claim Decomposition Engine
+- Interactive React + TypeScript dashboard
+- FastAPI backend with REST endpoints and Swagger UI
+- Historical analysis and result persistence with Supabase
+- Docker + n8n + FastAPI + React architecture
+- Conflict of interest detection
+- Bradford Hill causal inference signals
 
 ### 🔄 Planned
 - Cochrane integration
 - WHO evidence sources
 - NICE guideline integration
+- ClinicalTrials.gov integration
+- Authenticated public API for third-party applications
 - User authentication
-- Historical evidence tracking
-- Public API
-- Advanced evidence visualization
 - Multi-user support
-- ClinicalTrials.gov
+- Evidence versioning and historical tracking
 - Guideline-based reasoning
 - Evidence timeline analysis
 
