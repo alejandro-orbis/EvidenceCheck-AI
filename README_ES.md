@@ -21,7 +21,8 @@ Desarrollado como una plataforma real de verificación de evidencia biomédica.
 ![Bradford Hill](https://img.shields.io/badge/Bradford%20Hill-Inferencia%20Causal-darkgreen?style=flat-square)
 ![Async Jobs](https://img.shields.io/badge/Arquitectura-Async%20Jobs-purple?style=flat-square)
 ![Portfolio](https://img.shields.io/badge/Portfolio-Proyecto-success?style=flat-square)
-[![Tests](https://img.shields.io/badge/Tests-26%20pasando-brightgreen?style=flat-square)](https://vitest.dev/)
+[![Dashboard Tests](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/test.yml/badge.svg)](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/test.yml)
+[![Backend Tests](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/backend-tests.yml)
 [![Licencia: MIT](https://img.shields.io/badge/Licencia-MIT-22c55e?style=flat-square)](LICENSE)
 
 ---
@@ -519,6 +520,23 @@ Los tests cubren:
 * Filtrado de búsqueda
 * Formato de tiempo
 * Traducciones
+
+Ejecutar los tests del backend:
+
+```bash
+pip install -r backend/requirements-dev.txt
+pytest backend/tests -v
+```
+
+Los tests del backend simulan n8n (sin llamadas reales) y cubren:
+
+* Health check y endpoints de OpenAPI
+* Validación de peticiones (`/analysis` sin `claim` devuelve 422)
+* Envío del claim a n8n y devolución del job
+* Filtro de idioma en `/jobs` y `/result/{job_id}` (completado, pendiente, no encontrado)
+* Errores de n8n, respuestas que no son JSON y n8n caído o sin responder (devuelve 503)
+
+Las dos suites de tests se ejecutan en GitHub Actions en cada push a `main` y en cada pull request.
 
 ---
 

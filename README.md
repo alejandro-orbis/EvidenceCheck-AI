@@ -21,7 +21,8 @@ Built as a real-world biomedical evidence verification platform.
 ![Bradford Hill](https://img.shields.io/badge/Bradford%20Hill-Causal%20Inference-darkgreen?style=flat-square)
 ![Async Jobs](https://img.shields.io/badge/Architecture-Async%20Jobs-purple?style=flat-square)
 ![Portfolio Project](https://img.shields.io/badge/Portfolio-Project-success?style=flat-square)
-[![Tests](https://img.shields.io/badge/Tests-26%20passing-brightgreen?style=flat-square)](https://vitest.dev/)
+[![Dashboard Tests](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/test.yml/badge.svg)](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/test.yml)
+[![Backend Tests](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/backend-tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
 
 ---
@@ -521,6 +522,23 @@ Tests cover:
 * Search filtering
 * Time formatting
 * Translations
+
+Run backend tests:
+
+```bash
+pip install -r backend/requirements-dev.txt
+pytest backend/tests -v
+```
+
+Backend tests mock n8n (no real calls) and cover:
+
+* Health check and OpenAPI endpoints
+* Request validation (`/analysis` without `claim` returns 422)
+* Forwarding claims to n8n and returning the job
+* `/jobs` language filter and `/result/{job_id}` (completed, pending, not found)
+* n8n errors, non-JSON responses, and n8n unavailable or timing out (returns 503)
+
+Both test suites run on GitHub Actions on every push to `main` and every pull request.
 
 ---
 
