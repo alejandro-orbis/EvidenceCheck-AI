@@ -15,7 +15,7 @@ Desarrollado como una plataforma real de verificación de evidencia biomédica.
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 ![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat-square&logo=docker)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Python_3.12-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 ![Evidencia Biomédica](https://img.shields.io/badge/Biomédica-Análisis%20de%20Evidencia-blue?style=flat-square)
 ![Bradford Hill](https://img.shields.io/badge/Bradford%20Hill-Inferencia%20Causal-darkgreen?style=flat-square)
