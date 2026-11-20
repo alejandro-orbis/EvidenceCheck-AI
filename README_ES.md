@@ -15,13 +15,14 @@ Desarrollado como una plataforma real de verificación de evidencia biomédica.
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 ![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat-square&logo=docker)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Python_3.12-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 ![Evidencia Biomédica](https://img.shields.io/badge/Biomédica-Análisis%20de%20Evidencia-blue?style=flat-square)
 ![Bradford Hill](https://img.shields.io/badge/Bradford%20Hill-Inferencia%20Causal-darkgreen?style=flat-square)
 ![Async Jobs](https://img.shields.io/badge/Arquitectura-Async%20Jobs-purple?style=flat-square)
 ![Portfolio](https://img.shields.io/badge/Portfolio-Proyecto-success?style=flat-square)
-[![Tests](https://img.shields.io/badge/Tests-26%20pasando-brightgreen?style=flat-square)](https://vitest.dev/)
+[![Dashboard Tests](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/test.yml/badge.svg)](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/test.yml)
+[![Backend Tests](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/alejandro-orbis/EvidenceCheck-AI/actions/workflows/backend-tests.yml)
 [![Licencia: MIT](https://img.shields.io/badge/Licencia-MIT-22c55e?style=flat-square)](LICENSE)
 
 ---
@@ -519,6 +520,23 @@ Los tests cubren:
 * Filtrado de búsqueda
 * Formato de tiempo
 * Traducciones
+
+Ejecutar los tests del backend:
+
+```bash
+pip install -r backend/requirements-dev.txt
+pytest backend/tests -v
+```
+
+Los tests del backend simulan n8n (sin llamadas reales) y cubren:
+
+* Health check y endpoints de OpenAPI
+* Validación de peticiones (`/analysis` sin `claim` devuelve 422)
+* Envío del claim a n8n y devolución del job
+* Filtro de idioma en `/jobs` y `/result/{job_id}` (completado, pendiente, no encontrado)
+* Errores de n8n, respuestas que no son JSON y n8n caído o sin responder (devuelve 503)
+
+Las dos suites de tests se ejecutan en GitHub Actions en cada push a `main` y en cada pull request.
 
 ---
 

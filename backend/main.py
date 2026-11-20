@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -40,6 +41,15 @@ if not all([N8N_WEBHOOK, N8N_JOBS_URL, N8N_RESULT_URL]):
     raise ValueError(
         "Missing required environment variables: "
         "N8N_WEBHOOK, N8N_JOBS_URL, N8N_RESULT_URL"
+    )
+
+@app.exception_handler(httpx.RequestError)
+async def n8n_unavailable_handler(request: Request, exc: httpx.RequestError):
+    # n8n caído, timeout o URL inaccesible: devolver 503 claro en vez de un 500 genérico
+    print(f"❌ [ERROR] No se pudo conectar con n8n: {type(exc).__name__}: {exc}")
+    return JSONResponse(
+        status_code=503,
+        content={"detail": "Servicio de análisis no disponible. Inténtalo más tarde."},
     )
 
 @app.get("/health")
